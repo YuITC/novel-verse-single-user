@@ -1,5 +1,5 @@
-// npx tsx supabase/generate-seed.ts.
-// npx supabase db reset
+// Run:
+// npx tsx supabase/generate-seed.ts
 
 import { faker } from "@faker-js/faker";
 import * as fs from "fs";
@@ -7,8 +7,8 @@ import * as path from "path";
 
 const SEED_SQL_PATH = path.join(__dirname, "seed.sql");
 
-// USER_ID is fetched dynamically from auth.users in the SQL script
 const NUM_NOVELS = 50;
+
 const COLLECTIONS = [
   "My Favorites",
   "To Read Later",
@@ -17,30 +17,28 @@ const COLLECTIONS = [
   "Completed Epics",
 ];
 
-// Helper to escape SQL strings
-const escapeSql = (str: string | null | undefined) => {
+// Helpers
+const escapeSql = (str?: string | null) => {
   if (!str) return "NULL";
   return `'${str.replace(/'/g, "''")}'`;
 };
 
-// Helper to format an array for Postgres
 const pgArray = (arr: string[]) => {
   if (!arr || arr.length === 0) return "'{}'";
   return `ARRAY[${arr.map(escapeSql).join(", ")}]`;
 };
 
-// Helper to generate UUIDs
 const uuid = () => faker.string.uuid();
 
-// Data arrays
+// Data containers
 const novels: any[] = [];
 const chapters: any[] = [];
-const libraryEntries: any[] = [];
 const collections: any[] = [];
 const collectionNovels: any[] = [];
+const libraryEntries: any[] = [];
 const bookmarks: any[] = [];
 
-// 1. Generate OpenRouter Keys
+// OpenRouter keys
 const openrouterKeys = [
   {
     id: uuid(),
@@ -54,20 +52,16 @@ const openrouterKeys = [
     key_value: faker.string.alphanumeric(32),
     is_active: false,
   },
-  {
-    id: uuid(),
-    label: "Test Key",
-    key_value: faker.string.alphanumeric(32),
-    is_active: true,
-  },
 ];
 
-// 2. Generate Collections
+// Create collections
 for (const title of COLLECTIONS) {
-  collections.push({ id: uuid(), title });
+  collections.push({
+    id: uuid(),
+    title,
+  });
 }
 
-// 3. Generate Novels
 const genresList = [
   "Xianxia",
   "Wuxia",
@@ -78,17 +72,23 @@ const genresList = [
   "Adventure",
   "Mystery",
   "Horror",
-  "Slice of Life",
 ];
+
 const statuses = ["ongoing", "completed", "cancelled"];
 const readingStatuses = ["reading", "completed", "dropped", "read-later"];
 
+// Generate novels + chapters
 for (let i = 0; i < NUM_NOVELS; i++) {
   const novelId = uuid();
-  const numChapters = faker.number.int({ min: 10, max: 100 });
+
+  const numChapters = faker.number.int({
+    min: 10,
+    max: 80,
+  });
+
   const selectedGenres = faker.helpers.arrayElements(
     genresList,
-    faker.number.int({ min: 1, max: 4 }),
+    faker.number.int({ min: 1, max: 3 }),
   );
 
   novels.push({
@@ -106,14 +106,17 @@ for (let i = 0; i < NUM_NOVELS; i++) {
     publication_status: faker.helpers.arrayElement(statuses),
     reading_status: faker.helpers.arrayElement(readingStatuses),
     total_chapters: numChapters,
-    total_words: faker.number.int({ min: 10000, max: 5000000 }),
+    total_words: faker.number.int({ min: 10000, max: 3000000 }),
   });
 
-  // Generate chapters for this novel
-  const novelChapters = [];
+  const novelChapters: any[] = [];
+
   for (let j = 1; j <= numChapters; j++) {
     const chapId = uuid();
-    const isTranslated = faker.datatype.boolean({ probability: 0.8 });
+
+    const isTranslated = faker.datatype.boolean({
+      probability: 0.8,
+    });
 
     const chapter = {
       id: chapId,
@@ -123,173 +126,223 @@ for (let i = 0; i < NUM_NOVELS; i++) {
       title_translated: isTranslated
         ? `Chương ${j}: ${faker.lorem.words(3)}`
         : null,
-      content_raw: faker.lorem.paragraphs(10),
-      content_translated: isTranslated ? faker.lorem.paragraphs(10) : null,
+      content_raw: faker.lorem.paragraphs(8),
+      content_translated: isTranslated ? faker.lorem.paragraphs(8) : null,
       is_translated: isTranslated,
     };
+
     chapters.push(chapter);
     novelChapters.push(chapter);
   }
 
-  // Generate Library Entry (70% chance)
+  // Library entry
   if (faker.datatype.boolean({ probability: 0.7 })) {
-    const currentChapter = faker.helpers.arrayElement(novelChapters);
+    const current = faker.helpers.arrayElement(novelChapters);
+
     libraryEntries.push({
       novel_id: novelId,
-      current_chapter_id: currentChapter ? currentChapter.id : null,
+      current_chapter_id: current.id,
       reading_status: faker.helpers.arrayElement(readingStatuses),
     });
   }
 
-  // Add to collections (randomly)
-  const numCollectionsForNovel = faker.number.int({ min: 0, max: 2 });
-  if (numCollectionsForNovel > 0) {
-    const selectedCollections = faker.helpers.arrayElements(
-      collections,
-      numCollectionsForNovel,
-    );
-    for (const c of selectedCollections) {
-      collectionNovels.push({ collection_id: c.id, novel_id: novelId });
-    }
+  // Collection membership
+  const numCollections = faker.number.int({ min: 0, max: 2 });
+
+  const selectedCollections = faker.helpers.arrayElements(
+    collections,
+    numCollections,
+  );
+
+  for (const c of selectedCollections) {
+    collectionNovels.push({
+      collection_id: c.id,
+      novel_id: novelId,
+    });
   }
 
-  // Generate Bookmarks (10% chance per novel, random chapter)
-  if (
-    faker.datatype.boolean({ probability: 0.1 }) &&
-    novelChapters.length > 0
-  ) {
-    const targetChap = faker.helpers.arrayElement(novelChapters);
-    bookmarks.push({ novel_id: novelId, chapter_id: targetChap.id });
+  // Bookmark
+  if (faker.datatype.boolean({ probability: 0.2 })) {
+    const chap = faker.helpers.arrayElement(novelChapters);
+
+    bookmarks.push({
+      novel_id: novelId,
+      chapter_id: chap.id,
+    });
   }
 }
 
-// 4. Construct SQL String
+// Build SQL
 let sql = `
--- =============================================================================
--- AUTO-GENERATED SEED DATA
--- Generated at: ${new Date().toISOString()}
--- =============================================================================
+-- AUTO GENERATED SEED
 
 DO $$
 DECLARE
   v_user_id uuid;
 BEGIN
-  -- 1. Get the first user in the database
-  SELECT id INTO v_user_id FROM auth.users LIMIT 1;
 
-  IF v_user_id IS NULL THEN
-    RAISE EXCEPTION 'No user found in auth.users. Please create a user first via Supabase Local Dashboard.';
-  END IF;
+-- Ensure a dev user exists
+SELECT id INTO v_user_id FROM auth.users LIMIT 1;
 
-  -- =============================================================================
-  -- OPENROUTER KEYS
-  -- =============================================================================
+IF v_user_id IS NULL THEN
+  INSERT INTO auth.users (
+    id,
+    email,
+    encrypted_password,
+    email_confirmed_at,
+    created_at,
+    updated_at
+  )
+  VALUES (
+    gen_random_uuid(),
+    'dev@local.test',
+    crypt('password', gen_salt('bf')),
+    now(),
+    now(),
+    now()
+  )
+  RETURNING id INTO v_user_id;
+END IF;
 `;
 
-if (openrouterKeys.length > 0) {
-  sql += `  INSERT INTO public.openrouter_keys (id, user_id, label, key_value, is_active) VALUES\n`;
-  sql += openrouterKeys
-    .map(
-      (k) =>
-        `    ('${k.id}', v_user_id, ${escapeSql(k.label)}, ${escapeSql(k.key_value)}, ${k.is_active})`,
-    )
-    .join(",\n");
-  sql += `\n  ON CONFLICT DO NOTHING;\n\n`;
-}
+// OpenRouter keys
+sql += `
+INSERT INTO openrouter_keys (id, user_id, label, key_value, is_active)
+VALUES
+${openrouterKeys
+  .map(
+    (k) =>
+      `('${k.id}', v_user_id, ${escapeSql(k.label)}, ${escapeSql(
+        k.key_value,
+      )}, ${k.is_active})`,
+  )
+  .join(",\n")};
+`;
 
-// Helper to chunk arrays for batch INSERTs
-function chunkArray<T>(array: T[], size: number): T[][] {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
-}
+// Collections
+sql += `
+INSERT INTO collections (id, user_id, title)
+VALUES
+${collections
+  .map((c) => `('${c.id}', v_user_id, ${escapeSql(c.title)})`)
+  .join(",\n")};
+`;
 
-sql += `  -- =============================================================================\n`;
-sql += `  -- NOVELS\n`;
-sql += `  -- =============================================================================\n`;
-const novelChunks = chunkArray(novels, 100);
-for (const chunk of novelChunks) {
-  sql += `  INSERT INTO public.novels (id, user_id, source_url, source_origin, title_raw, title_translated, author_raw, author_translated, cover_url, description_raw, description_translated, genres, publication_status, reading_status, total_chapters, total_words)\n  VALUES\n`;
-  sql += chunk
-    .map(
-      (n) =>
-        `    ('${n.id}', v_user_id, ${escapeSql(n.source_url)}, ${escapeSql(n.source_origin)}, ${escapeSql(n.title_raw)}, ${escapeSql(n.title_translated)}, ${escapeSql(n.author_raw)}, ${escapeSql(n.author_translated)}, ${escapeSql(n.cover_url)}, ${escapeSql(n.description_raw)}, ${escapeSql(n.description_translated)}, ${pgArray(n.genres)}, ${escapeSql(n.publication_status)}, ${escapeSql(n.reading_status)}, ${n.total_chapters}, ${n.total_words})`,
-    )
-    .join(",\n");
-  sql += `\n  ON CONFLICT (id) DO NOTHING;\n\n`;
-}
+// Novels
+sql += `
+INSERT INTO novels (
+  id,user_id,source_url,source_origin,title_raw,title_translated,
+  author_raw,author_translated,cover_url,description_raw,
+  description_translated,genres,publication_status,
+  reading_status,total_chapters,total_words
+)
+VALUES
+${novels
+  .map(
+    (n) => `(
+'${n.id}',
+v_user_id,
+${escapeSql(n.source_url)},
+${escapeSql(n.source_origin)},
+${escapeSql(n.title_raw)},
+${escapeSql(n.title_translated)},
+${escapeSql(n.author_raw)},
+${escapeSql(n.author_translated)},
+${escapeSql(n.cover_url)},
+${escapeSql(n.description_raw)},
+${escapeSql(n.description_translated)},
+${pgArray(n.genres)},
+${escapeSql(n.publication_status)},
+${escapeSql(n.reading_status)},
+${n.total_chapters},
+${n.total_words}
+)`,
+  )
+  .join(",\n")};
+`;
 
-sql += `  -- =============================================================================\n`;
-sql += `  -- CHAPTERS\n`;
-sql += `  -- =============================================================================\n`;
-const chapterChunks = chunkArray(chapters, 100);
-for (const chunk of chapterChunks) {
-  sql += `  INSERT INTO public.chapters (id, novel_id, user_id, chapter_index, title_raw, title_translated, content_raw, content_translated, is_translated)\n  VALUES\n`;
-  sql += chunk
-    .map(
-      (c) =>
-        `    ('${c.id}', '${c.novel_id}', v_user_id, ${c.chapter_index}, ${escapeSql(c.title_raw)}, ${escapeSql(c.title_translated)}, ${escapeSql(c.content_raw)}, ${escapeSql(c.content_translated)}, ${c.is_translated})`,
-    )
-    .join(",\n");
-  sql += `\n  ON CONFLICT (id) DO NOTHING;\n\n`;
-}
+// Chapters
+sql += `
+INSERT INTO chapters (
+id,novel_id,user_id,chapter_index,title_raw,title_translated,
+content_raw,content_translated,is_translated
+)
+VALUES
+${chapters
+  .map(
+    (c) => `(
+'${c.id}',
+'${c.novel_id}',
+v_user_id,
+${c.chapter_index},
+${escapeSql(c.title_raw)},
+${escapeSql(c.title_translated)},
+${escapeSql(c.content_raw)},
+${escapeSql(c.content_translated)},
+${c.is_translated}
+)`,
+  )
+  .join(",\n")};
+`;
 
-sql += `  -- =============================================================================\n`;
-sql += `  -- LIBRARY\n`;
-sql += `  -- =============================================================================\n`;
-const libChunks = chunkArray(libraryEntries, 100);
-for (const chunk of libChunks) {
-  sql += `  INSERT INTO public.library_entries (user_id, novel_id, current_chapter_id, reading_status)\n  VALUES\n`;
-  sql += chunk
-    .map(
-      (l) =>
-        `    (v_user_id, '${l.novel_id}', ${l.current_chapter_id ? `'${l.current_chapter_id}'` : "NULL"}, ${escapeSql(l.reading_status)})`,
-    )
-    .join(",\n");
-  sql += `\n  ON CONFLICT (user_id, novel_id) DO NOTHING;\n\n`;
-}
+// Library
+sql += `
+INSERT INTO library_entries (
+id,user_id,novel_id,current_chapter_id,reading_status
+)
+VALUES
+${libraryEntries
+  .map(
+    (l) => `(
+'${uuid()}',
+v_user_id,
+'${l.novel_id}',
+'${l.current_chapter_id}',
+${escapeSql(l.reading_status)}
+)`,
+  )
+  .join(",\n")};
+`;
 
-sql += `  -- =============================================================================\n`;
-sql += `  -- COLLECTIONS\n`;
-sql += `  -- =============================================================================\n`;
-if (collections.length > 0) {
-  sql += `  INSERT INTO public.collections (id, user_id, title)\n  VALUES\n`;
-  sql += collections
-    .map((c) => `    ('${c.id}', v_user_id, ${escapeSql(c.title)})`)
-    .join(",\n");
-  sql += `\n  ON CONFLICT (id) DO NOTHING;\n\n`;
-}
+// Collection novels
+sql += `
+INSERT INTO collection_novels (
+collection_id,novel_id,user_id
+)
+VALUES
+${collectionNovels
+  .map(
+    (c) => `(
+'${c.collection_id}',
+'${c.novel_id}',
+v_user_id
+)`,
+  )
+  .join(",\n")};
+`;
 
-if (collectionNovels.length > 0) {
-  const collNovelChunks = chunkArray(collectionNovels, 100);
-  for (const chunk of collNovelChunks) {
-    sql += `  INSERT INTO public.collection_novels (collection_id, novel_id, user_id)\n  VALUES\n`;
-    sql += chunk
-      .map((cn) => `    ('${cn.collection_id}', '${cn.novel_id}', v_user_id)`)
-      .join(",\n");
-    sql += `\n  ON CONFLICT (collection_id, novel_id) DO NOTHING;\n\n`;
-  }
-}
+// Bookmarks
+sql += `
+INSERT INTO bookmarks (
+id,user_id,novel_id,chapter_id
+)
+VALUES
+${bookmarks
+  .map(
+    (b) => `(
+'${uuid()}',
+v_user_id,
+'${b.novel_id}',
+'${b.chapter_id}'
+)`,
+  )
+  .join(",\n")};
+`;
 
-sql += `  -- =============================================================================\n`;
-sql += `  -- BOOKMARKS\n`;
-sql += `  -- =============================================================================\n`;
-if (bookmarks.length > 0) {
-  const bookmarkChunks = chunkArray(bookmarks, 100);
-  for (const chunk of bookmarkChunks) {
-    sql += `  INSERT INTO public.bookmarks (user_id, novel_id, chapter_id)\n  VALUES\n`;
-    sql += chunk
-      .map((b) => `    (v_user_id, '${b.novel_id}', '${b.chapter_id}')`)
-      .join(",\n");
-    sql += `\n  ON CONFLICT (user_id, novel_id, chapter_id) DO NOTHING;\n\n`;
-  }
-}
+sql += `
+END $$;
+`;
 
-sql += `END $$;\n`;
+fs.writeFileSync(SEED_SQL_PATH, sql);
 
-fs.writeFileSync(SEED_SQL_PATH, sql, "utf-8");
-console.log(
-  `Successfully generated seed.sql with ${novels.length} novels, ${chapters.length} chapters, ${libraryEntries.length} library entries, ${collections.length} collections, and ${bookmarks.length} bookmarks.`,
-);
+console.log("Seed SQL generated:", SEED_SQL_PATH);

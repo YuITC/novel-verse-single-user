@@ -121,11 +121,12 @@ export class UukanshuCrawler extends BaseCrawler {
         try {
           const content = await this.getChapterContent(chapter.url);
           return { ...chapter, content };
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const errMsg = error instanceof Error ? error.message : String(error);
           console.error(
-            `[UukanshuCrawler] Failed to fetch chapter ${chapter.index}: ${error.message}`,
+            `[UukanshuCrawler] Failed to fetch chapter ${chapter.index}: ${errMsg}`,
           );
-          return { ...chapter, content: `[CRAWL_FAILED] ${error.message}` }; // Fallback to avoid breaking stream
+          return { ...chapter, content: `[CRAWL_FAILED] ${errMsg}` }; // Fallback to avoid breaking stream
         }
       }),
     );

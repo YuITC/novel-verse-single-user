@@ -76,10 +76,10 @@ Once a user clicks "Start Crawl", the following server-side workflow executes:
 ```
 1. Validate URL & detect source
 2. Fetch novel metadata (title, author, cover, description, total chapters)
-3. Fetch chapter list (ordered index + titles + URLs)
+3. Fetch chapter list (ordered index + titles + URLs, utilizing FileCache to save bandwidth)
 4. Create/update `novels` row in database
 5. Create `crawl_jobs` row with status = 'running'
-6. For each chapter (sequential, throttled):
+6. For each chapter (concurrent, via AsyncGenerator streaming):
    a. Fetch chapter HTML (with anti-bot bypass strategy)
    b. Clean & normalize text content
    c. Insert `chapters` row
@@ -111,14 +111,16 @@ After fetching each chapter, the `TextCleaner` performs a 3-step pipeline:
 | 2    | Pattern Cleaning   | Remove site-specific watermark patterns (domain promotions, memorization prompts).               |
 | 3    | Text Normalization | Strip zero-width characters, normalize CRLF → LF, trim lines, collapse empty lines.              |
 
-### 3.4 Rate Limiting & Throttling
+### 3.4 Rate Limiting & Anti-Bot Optimization
 
-| Parameter         | Value                         | Purpose                                           |
-| ----------------- | ----------------------------- | ------------------------------------------------- |
-| **Base delay**    | 1500–2000ms per chapter fetch | Avoid triggering rate limits                      |
-| **Random jitter** | +0–500ms                      | Humanize request patterns                         |
-| **BackOff**       | Exponential on failure        | Prevent hammering on repeated failures            |
-| **Concurrency**   | Sequential (1 at a time)      | Single-threaded per crawl job to reduce detection |
+| Parameter          | Value                        | Purpose                                                |
+| ------------------ | ---------------------------- | ------------------------------------------------------ |
+| **Adaptive Delay** | +/- 30% of base delay        | Humanize request intervals dynamically                 |
+| **Long Pause**     | 5% chance of 10-15s wait     | Simulate human reading breaks                          |
+| **BackOff**        | Exponential on failure       | Prevent hammering on repeated failures                 |
+| **Concurrency**    | Managed by `p-queue` (5 max) | Safe parallel processing without triggering DDoS flags |
+| **Caching**        | Local `.cache/` FileCache    | Avoid re-fetching heavy chapter lists                  |
+| **Connection**     | HTTP/2 Keep-Alive (`got`)    | Re-use connections to speed up chapter fetching        |
 
 ---
 
