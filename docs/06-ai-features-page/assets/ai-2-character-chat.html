@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NovelVerse - Character Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c2bee",
+                        "background-light": "#fafafa",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light text-slate-900 font-sans min-h-screen">
+<div class="flex h-screen w-full flex-col overflow-hidden">
+<header class="flex-none flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 px-8 py-4 bg-white z-10">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-slate-900">
+<div class="size-6 text-primary">
+<span class="material-symbols-outlined text-2xl">auto_stories</span>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-tight">NovelVerse</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-full h-full bg-slate-100/80 border border-slate-200/50 focus-within:border-slate-300 transition-colors">
+<div class="text-slate-400 flex items-center justify-center pl-4 rounded-l-full">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 bg-transparent text-slate-900 focus:outline-0 focus:ring-0 border-none h-full placeholder:text-slate-400 px-3 text-sm font-medium leading-normal" placeholder="Search novels..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-8">
+<nav class="hidden lg:flex items-center gap-8">
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">Library</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">Explore</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">Crawler</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">Uploader</a>
+<a class="text-primary text-sm font-semibold" href="#">AI Features</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 border border-slate-200 cursor-pointer" data-alt="User profile avatar placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCtnPRw_swXi_X-9x05bPlHudlux7Z55xkHhwsURZ3eDwxfoBBiGLI-Bq5LmCF1jUmPKCgweir5FmH6aYHo5W7CIDLARlIqS5eZfPFyu1z3rNDpgiGibCGw-o0ZiKjnGsRO8J50c_bKQpSuWrp3qU_MK67EDOWSiST6LFixZSt1bxwckympeuZdW5i_Mx85nmwXOgFTjw-Mv963Z89fgxyQairki5ZwW0LE1TvMo3r_rXsOryyoxaXv66uZi99NCGl_KecLlKk6vQ");'></div>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<aside class="w-80 bg-white border-r border-slate-200 flex flex-col overflow-y-auto">
+<div class="p-6 flex flex-col gap-6">
+<div>
+<h3 class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">book</span> Select Novel
+</h3>
+<select class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-4 py-3 focus:ring-primary focus:border-primary outline-none">
+<option>The Rebirth of the Supreme Dragon</option>
+<option>System Architect: Building Heavens</option>
+</select>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">person</span> Select Character
+</h3>
+<select class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-4 py-3 focus:ring-primary focus:border-primary outline-none mb-4">
+<option>Lin Fan</option>
+<option>Elder Bai</option>
+<option>Ye Chen</option>
+</select>
+<div class="w-full aspect-[3/4] rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden relative shadow-sm">
+<img alt="Character Avatar Preview" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCILGd5b0YmjIAlykuKxbtfPLUN2wfQuZSe1NoF-Hvl6eI-tBGZRSsV1VfdmfGyHg9QKXjcDp_xNEMFORAoOVecgyGp8SDH3fDI-Zt-CbzgRUcjLkG9GQ9vj_E8JOwDxazQMLW4j1yfS8qOKnBJ41E9YIR1eMYHG0-atqGBeFEPq91KDhjz-BBDpKPuhLeafkoeNiVXUUMG2AH8ZskbFHn5SXAtzi4Eh3OdKhrpi4okp0nbo8J4nSNC-oKo23HziHZgOhP8lETE-Q"/>
+<div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
+<p class="text-white font-semibold">Lin Fan</p>
+<p class="text-slate-300 text-xs">Supreme Dragon Emperor</p>
+</div>
+</div>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">tune</span> Chapter Knowledge
+</h3>
+<p class="text-xs text-slate-500 mb-3">Set the chapter limit to avoid spoilers. The character will only know events up to this point.</p>
+<div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+<div class="flex justify-between text-sm font-medium text-slate-700 mb-2">
+<span>Current:</span>
+<span class="text-primary">Chapter 89</span>
+</div>
+<input class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" max="450" min="1" type="range" value="89"/>
+<div class="flex justify-between text-[10px] text-slate-400 mt-2">
+<span>Ch. 1</span>
+<span>Ch. 450</span>
+</div>
+</div>
+</div>
+<button class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">refresh</span> Reset Chat
+</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col bg-slate-50/50 relative">
+<div class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+<div class="flex items-center gap-4">
+<img alt="Lin Fan Avatar" class="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1buBL5HhmYNm6yT2xTarHJ8EtQ6ZooLgjPbiU60Mg1AZrcmM94XpX33YehhrcmFig1w4UjsZKtXgvc-CMRRd5Lf3-FsyQJhMQOzy2VeWZRxSu_Owb7ICGXl2pePv_dbF_n70IJ5UPfEg8vNxn_dmVk41aUUN-fP99dd_wkBGXJnokEyyPoKXqdp-KMUpqrDA7_2vrGdlNVBJis3V6ECDbIFemQAePgoQ3q8x-94fsKVlrnZhtZMp_ZlaLMsmhqAIESZGiGlI9ow"/>
+<div>
+<h2 class="text-lg font-bold text-slate-900 leading-tight">Lin Fan</h2>
+<p class="text-xs text-slate-500 font-medium">The Rebirth of the Supreme Dragon</p>
+</div>
+<div class="h-8 w-px bg-slate-200 mx-2"></div>
+<div class="flex gap-2">
+<span class="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-600 text-[11px] rounded-full font-medium">Arrogant</span>
+<span class="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-600 text-[11px] rounded-full font-medium">Strategic</span>
+<span class="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-600 text-[11px] rounded-full font-medium">Protective</span>
+</div>
+</div>
+<button class="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors lg:hidden">
+<span class="material-symbols-outlined">info</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+<div class="flex flex-col items-center my-4">
+<span class="px-3 py-1 bg-slate-200/50 text-slate-500 text-xs rounded-full">Knowledge synced to Chapter 89</span>
+</div>
+<div class="flex gap-4 max-w-3xl">
+<img alt="Lin Fan Avatar" class="w-8 h-8 rounded-full object-cover border border-slate-200 flex-shrink-0 mt-1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMfjxZ_rB7n7DnorEMme6UyWOJL9qqrOklkmnkxZAssnk4bZCx32cdYjUWb_saY4RhWiYPyvlShVy-k95g4VNGCBLkU-pDb7Kz6EVAXoKmw_jfKpJC8YytOS1Go1nz3946_uMee-TXEuN0dXxkrrxFUlyBIfEFM0cSTKu10IqLbKEP30Ws0Ki5TOIsEYRDKtQJJqKKqdGB9Vhxpm7c97LipAifI6XiYRhjyyJsK9JK89rjs7HQFZAF-0YWNeo6FexQVd6NuhTdzg"/>
+<div class="flex flex-col gap-1">
+<span class="text-xs font-semibold text-slate-700 ml-1">Lin Fan</span>
+<div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3 text-sm text-slate-700 shadow-sm leading-relaxed">
+<p>*Crosses his arms and looks at you with a slight smirk*</p>
+<p class="mt-2">"Another bug in the heavenly Dao? Hand it over, I'll patch it. But you should know by now, my services aren't cheap. The Azure Dragon Sect still owes me three spirit veins for the last incident."</p>
+</div>
+</div>
+</div>
+<div class="flex gap-4 max-w-3xl self-end flex-row-reverse">
+<div class="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex-shrink-0 mt-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-500 text-sm">person</span>
+</div>
+<div class="flex flex-col gap-1 items-end">
+<span class="text-xs font-semibold text-slate-700 mr-1">You</span>
+<div class="bg-primary/10 border border-primary/20 rounded-2xl rounded-tr-none px-5 py-3 text-sm text-slate-800 shadow-sm leading-relaxed">
+<p>Actually, it's about Elder Bai. I saw him near the forbidden back mountain last night.</p>
+</div>
+</div>
+</div>
+<div class="flex gap-4 max-w-3xl">
+<img alt="Lin Fan Avatar" class="w-8 h-8 rounded-full object-cover border border-slate-200 flex-shrink-0 mt-1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-KNzVLS-jlYR8K_a4kdDL2s78qJ_RNB8IbjR3hNNB770WrnD_m5-_byXzEdEuCwaCPmz-VR8_qgpzX16Z_ywojAvNlYiekod_Y02wHGjp4rZGnkwpmGIgtJLP2CyZXQzt9U5uhnjK4znDlsl_uC7t2SvcEV7vKgg_KZaxstsO9VlbFvBz3d72NqTwxkG2ypkwhxx1u-eC7x6PAMKI9qKd9lVcwgUglC7YBwUz1ykCd8ltuBwMqi8cA1R_zC_xXOvKN1GP2W9UGA"/>
+<div class="flex flex-col gap-1">
+<span class="text-xs font-semibold text-slate-700 ml-1">Lin Fan</span>
+<div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3 text-sm text-slate-700 shadow-sm leading-relaxed">
+<p>*His smirk vanishes instantly, eyes narrowing dangerously*</p>
+<p class="mt-2">"Elder Bai... at the forbidden mountain? That old fool. He thinks I don't know he's been siphoning the sect's core array energy. Tell me exactly what time you saw him. If he's breached the second ward, I'll need to intervene before he destroys us all."</p>
+</div>
+<div class="flex items-center gap-2 mt-1 ml-1">
+<button class="text-slate-400 hover:text-primary transition-colors flex items-center gap-1 text-xs">
+<span class="material-symbols-outlined text-[14px]">thumb_up</span>
+</button>
+<button class="text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1 text-xs">
+<span class="material-symbols-outlined text-[14px]">thumb_down</span>
+</button>
+<button class="text-slate-400 hover:text-slate-700 transition-colors flex items-center gap-1 text-xs ml-2">
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 bg-white border-t border-slate-200">
+<div class="max-w-4xl mx-auto relative flex items-end gap-2 bg-slate-50 border border-slate-200 rounded-2xl p-2 shadow-sm focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<textarea class="w-full bg-transparent border-none focus:ring-0 resize-none text-sm text-slate-700 max-h-32 min-h-[44px] py-3 px-3 scrollbar-hide" placeholder="Message Lin Fan..." rows="1"></textarea>
+<div class="flex items-center gap-1 pb-1 pr-1">
+<button class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-xl transition-colors" title="Regenerate Response">
+<span class="material-symbols-outlined text-[20px]">autorenew</span>
+</button>
+<button class="p-2 bg-primary text-white hover:bg-primary/90 rounded-xl transition-colors shadow-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+</div>
+</div>
+<p class="text-center text-[10px] text-slate-400 mt-2">AI-generated character responses. May not be strictly canon.</p>
+</div>
+</main>
+<aside class="w-80 bg-white border-l border-slate-200 hidden lg:flex flex-col overflow-y-auto">
+<div class="p-6">
+<h2 class="text-base font-bold text-slate-900 mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">local_library</span> Character Lore &amp; Context
+</h2>
+<div class="mb-6">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Biography</h3>
+<p class="text-sm text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    Once the supreme ruler of the Dragon Realm, betrayed by his brethren. Reincarnated into the mortal realm with a unique "System" that views the Heavenly Dao as flawed code he must fix.
+                </p>
+</div>
+<div class="mb-6">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex justify-between items-center">
+<span>Current World State</span>
+<span class="bg-primary/10 text-primary px-2 py-0.5 rounded text-[9px]">Ch. 89</span>
+</h3>
+<ul class="space-y-2">
+<li class="bg-white border border-slate-200 p-3 rounded-xl text-sm text-slate-700 shadow-sm flex gap-3 items-start">
+<span class="material-symbols-outlined text-amber-500 text-lg flex-shrink-0 mt-0.5">location_city</span>
+<div>
+<span class="font-semibold block mb-0.5 text-xs">Location</span>
+                            Azure Dragon Sect, Outer Courtyard
+                        </div>
+</li>
+<li class="bg-white border border-slate-200 p-3 rounded-xl text-sm text-slate-700 shadow-sm flex gap-3 items-start">
+<span class="material-symbols-outlined text-rose-500 text-lg flex-shrink-0 mt-0.5">swords</span>
+<div>
+<span class="font-semibold block mb-0.5 text-xs">Cultivation Level</span>
+                            Foundation Establishment, 4th Stage
+                        </div>
+</li>
+<li class="bg-white border border-slate-200 p-3 rounded-xl text-sm text-slate-700 shadow-sm flex gap-3 items-start">
+<span class="material-symbols-outlined text-indigo-500 text-lg flex-shrink-0 mt-0.5">inventory_2</span>
+<div>
+<span class="font-semibold block mb-0.5 text-xs">Key Items</span>
+                            Broken Heavenly Void Cauldron
+                        </div>
+</li>
+</ul>
+</div>
+<div>
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Key Relationships</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-xs">EB</div>
+<div>
+<p class="text-sm font-semibold text-slate-800">Elder Bai</p>
+<p class="text-[10px] text-slate-500">Antagonist / Suspect</p>
+</div>
+</div>
+<span class="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] rounded border border-red-100 font-medium">Hostile</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-xs">SX</div>
+<div>
+<p class="text-sm font-semibold text-slate-800">Su Xue</p>
+<p class="text-[10px] text-slate-500">Junior Sister</p>
+</div>
+</div>
+<span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] rounded border border-emerald-100 font-medium">Ally</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NovelVerse - Explore</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c2bee",
+                        "background-light": "#fafafa",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light text-slate-900 font-sans min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<div class="px-8 md:px-12 lg:px-20 flex flex-1 justify-center py-5">
+<div class="layout-content-container flex flex-col max-w-[1200px] flex-1 w-full">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 pb-6 pt-4 mb-8">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-slate-900">
+<div class="size-6 text-primary">
+<span class="material-symbols-outlined text-2xl">auto_stories</span>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-tight">NovelVerse</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-full h-full bg-slate-100/80 border border-slate-200/50 focus-within:border-slate-300 transition-colors">
+<div class="text-slate-400 flex items-center justify-center pl-4 rounded-l-full">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 bg-transparent text-slate-900 focus:outline-0 focus:ring-0 border-none h-full placeholder:text-slate-400 px-3 text-sm font-medium leading-normal" placeholder="Search novels..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-8">
+<nav class="hidden lg:flex items-center gap-8">
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">Library</a>
+<a class="text-slate-900 text-sm font-semibold" href="#">Explore</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">Crawler</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">Uploader</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">AI Features</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 border border-slate-200 cursor-pointer" data-alt="User profile avatar placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCtnPRw_swXi_X-9x05bPlHudlux7Z55xkHhwsURZ3eDwxfoBBiGLI-Bq5LmCF1jUmPKCgweir5FmH6aYHo5W7CIDLARlIqS5eZfPFyu1z3rNDpgiGibCGw-o0ZiKjnGsRO8J50c_bKQpSuWrp3qU_MK67EDOWSiST6LFixZSt1bxwckympeuZdW5i_Mx85nmwXOgFTjw-Mv963Z89fgxyQairki5ZwW0LE1TvMo3r_rXsOryyoxaXv66uZi99NCGl_KecLlKk6vQ");'></div>
+<div class="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+<div class="py-1">
+<a class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>Settings
+                                            </a>
+<a class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900" href="#">
+<span class="material-symbols-outlined text-lg">logout</span>Log out
+                                            </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 pb-16">
+<div class="flex flex-col gap-2 mb-8">
+<h1 class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">Explore Novels</h1>
+<p class="text-slate-500 text-base">Discover your next favorite story</p>
+</div>
+<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-10">
+<div class="flex flex-col gap-4">
+<div class="flex flex-col lg:flex-row gap-4">
+<div class="w-full lg:w-[280px] shrink-0">
+<label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Search</label>
+<div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3 h-10 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<span class="material-symbols-outlined text-slate-400 text-lg">search</span>
+<input class="bg-transparent border-none text-sm text-slate-900 w-full focus:ring-0 placeholder:text-slate-400" placeholder="Title, author..." type="text"/>
+</div>
+</div>
+<div class="w-full lg:flex-1 shrink-0">
+<label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Status</label>
+<div class="flex items-center justify-between w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl min-h-[40px] py-1.5 px-3 cursor-pointer">
+<div class="flex flex-wrap gap-1.5">
+<span class="bg-white border border-slate-200 text-slate-600 text-[11px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">Ongoing <span class="material-symbols-outlined text-[14px] hover:text-slate-900">close</span></span>
+<span class="bg-white border border-slate-200 text-slate-600 text-[11px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">Completed <span class="material-symbols-outlined text-[14px] hover:text-slate-900">close</span></span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-lg ml-2">expand_more</span>
+</div>
+</div>
+<div class="w-full lg:w-[160px] shrink-0">
+<label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Ch. Range</label>
+<select class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl h-10 px-3 focus:border-primary focus:ring-primary">
+<option value="any">Any</option>
+<option value="0-100">0 - 100</option>
+<option selected="" value="100-1000">100 - 1000+</option>
+</select>
+</div>
+</div>
+<div class="flex flex-col lg:flex-row gap-4 items-end">
+<div class="w-full lg:flex-1">
+<label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Tags</label>
+<div class="flex items-center justify-between w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl min-h-[40px] py-1.5 px-3 cursor-pointer">
+<div class="flex flex-wrap gap-1.5">
+<span class="bg-primary/10 text-primary border border-primary/20 text-[11px] uppercase tracking-wide px-2 py-0.5 rounded-md flex items-center gap-1 font-semibold">Action <span class="material-symbols-outlined text-[14px] hover:text-primary/70">close</span></span>
+<span class="bg-primary/10 text-primary border border-primary/20 text-[11px] uppercase tracking-wide px-2 py-0.5 rounded-md flex items-center gap-1 font-semibold">Fantasy <span class="material-symbols-outlined text-[14px] hover:text-primary/70">close</span></span>
+<span class="bg-primary/10 text-primary border border-primary/20 text-[11px] uppercase tracking-wide px-2 py-0.5 rounded-md flex items-center gap-1 font-semibold">System <span class="material-symbols-outlined text-[14px] hover:text-primary/70">close</span></span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-lg ml-2">expand_more</span>
+</div>
+</div>
+<div class="w-full lg:w-[200px] shrink-0">
+<label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Sort By</label>
+<select class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl h-10 px-3 focus:border-primary focus:ring-primary">
+<option value="popular">Popularity</option>
+<option value="chapters">Chapters</option>
+<option value="updated">Update Date</option>
+<option value="rating">Rating</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<div class="mb-6 flex justify-between items-center">
+<h2 class="text-lg font-bold text-slate-900">Found 24,512 Results</h2>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
+<div class="group flex flex-col sm:flex-row items-stretch gap-6 rounded-2xl bg-white border border-slate-100 p-5 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.08)] transition-all duration-300">
+<div class="w-full sm:w-36 shrink-0 bg-center bg-no-repeat aspect-[2/3] sm:aspect-[3/4] bg-cover rounded-xl border border-slate-100" data-alt="Vertical novel cover for Supreme Dragon" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDph21aR1KMeBmh2hN5ZflN5xtZd9wxIH4hPiYMgo7DVGHBpoQSwty78DKnzka8OPRKwJBhQBWcC5N-gXlT6csiEBQqD6Vzlf3UGoadPHSp2OEux-O2rI8MNr7oK3tfXiAKVyTdtuuDCF-jMx-gnJ2uTh6IeCeZQX_7G-STSCZDKAboee9Sm9HRvdRnej7Yo8aIbsTgo-eURRKQTrc_KAxtEZYGURzKzAnUcDBJ9FFQJ0olGrlztTC2C1zK7_n1DdQt918wi9Hrfw");'></div>
+<div class="flex flex-col justify-between py-1 flex-1 min-w-0">
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-start gap-4">
+<h3 class="text-xl font-bold leading-snug truncate text-slate-900 group-hover:text-primary transition-colors">The Rebirth of the Supreme Dragon</h3>
+<button class="text-slate-400 hover:text-slate-700 transition-colors shrink-0">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</div>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-slate-500">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">person</span> HeavenlySword</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">menu_book</span> 1,542 Ch.</span>
+<span class="flex items-center gap-1.5 text-slate-400"><span class="material-symbols-outlined text-[15px]">schedule</span> Updated 2h ago</span>
+</div>
+<p class="text-sm leading-relaxed text-slate-500 line-clamp-2 mt-1">
+                                            A high school student discovers he is the reincarnation of an ancient dragon emperor. Now, armed with forbidden knowledge and supreme martial arts, he must navigate the modern world while defending it from hidden supernatural threats that seek his power.
+                                        </p>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-4 mt-5 pt-4 border-t border-slate-50">
+<div class="flex flex-wrap gap-2">
+<span class="px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase rounded-md border border-slate-200 text-slate-500">Action</span>
+<span class="px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase rounded-md border border-slate-200 text-slate-500">Fantasy</span>
+</div>
+<button class="flex items-center gap-1.5 text-primary font-semibold text-sm hover:opacity-70 transition-opacity">
+<span>Read</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col sm:flex-row items-stretch gap-6 rounded-2xl bg-white border border-slate-100 p-5 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.08)] transition-all duration-300">
+<div class="w-full sm:w-36 shrink-0 bg-center bg-no-repeat aspect-[2/3] sm:aspect-[3/4] bg-cover rounded-xl border border-slate-100" data-alt="Vertical novel cover for System Architect" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAWtMY5i9DpaOmqmfUsRAwIJvGAq4QDB1i0URPJCInGWexdpjr0cmnJ7d7lGbX3pSx7naVzdF4hdcGg-GIRP3eTSH4FYDKEH8BZq6nemYBsAxazOIBRfhrczC2w_2E5nkm2n8pf4OQ_xJbD4Pt4iWTk5dA7FaK7uTGXYGX0zl4qkYlWn2LatkmRrDWCWVjq9vTH4JoPRT_G5OQ5dDnhOed-_pRgcXde0C6iD6oxI05iUMrwb8pr79ROFJwuRJqxozHB5PvKKn03-A");'></div>
+<div class="flex flex-col justify-between py-1 flex-1 min-w-0">
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-start gap-4">
+<h3 class="text-xl font-bold leading-snug truncate text-slate-900 group-hover:text-primary transition-colors">System Architect: Building Heavens</h3>
+<button class="text-slate-400 hover:text-slate-700 transition-colors shrink-0">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</div>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-slate-500">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">person</span> CodeWeaver</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">menu_book</span> 89 Ch.</span>
+<span class="flex items-center gap-1.5 text-slate-400"><span class="material-symbols-outlined text-[15px]">schedule</span> Updated Yesterday</span>
+</div>
+<p class="text-sm leading-relaxed text-slate-500 line-clamp-2 mt-1">
+                                            Transmigrated into a cultivation world with a failing game engine, Lin Fan must debug the very fabric of reality to survive. Every sect is a legacy codebase, every heavenly tribulation is a critical bug, and he's the only full-stack developer in the realm.
+                                        </p>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-4 mt-5 pt-4 border-t border-slate-50">
+<div class="flex flex-wrap gap-2">
+<span class="px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase rounded-md border border-slate-200 text-slate-500">Sci-Fi</span>
+<span class="px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase rounded-md border border-slate-200 text-slate-500">System</span>
+</div>
+<button class="flex items-center gap-1.5 text-primary font-semibold text-sm hover:opacity-70 transition-opacity">
+<span>Read</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col sm:flex-row items-stretch gap-6 rounded-2xl bg-white border border-slate-100 p-5 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.08)] transition-all duration-300">
+<div class="w-full sm:w-36 shrink-0 bg-center bg-no-repeat aspect-[2/3] sm:aspect-[3/4] bg-cover rounded-xl border border-slate-100" data-alt="Vertical novel cover for Shadow Monarch" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuACOtbXtIulQJtfXCV5cdbMDsgNar4zmg9WOFSAN70jAOCyEOHr0blj7uFWqSPGF2BDVQ-NEtLnySepi32bn4H1PHrQ2mKy3u3oAW7A5JxG7mdGgrIRmYhLcO886uJQ36bYsL7OGzLsCnThEYWB0ZTNUQEs7nYptf9y4XaYNkSXovb1-TZg9_BK36L4VfLb9uHg2T5fM-mKsfFL-aFEHqMd7EWJqDpSHTfsmL4SSWeQ404TJ58TDspqEhgvtuTG_Gdq5pKiUnR0LQ");'></div>
+<div class="flex flex-col justify-between py-1 flex-1 min-w-0">
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-start gap-4">
+<h3 class="text-xl font-bold leading-snug truncate text-slate-900 group-hover:text-primary transition-colors">Shadow Monarch's Return</h3>
+<button class="text-slate-400 hover:text-slate-700 transition-colors shrink-0">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</div>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-slate-500">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">person</span> NightPen</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">menu_book</span> 3,012 Ch.</span>
+<span class="flex items-center gap-1.5 text-emerald-600"><span class="material-symbols-outlined text-[15px]">done_all</span> Completed</span>
+</div>
+<p class="text-sm leading-relaxed text-slate-500 line-clamp-2 mt-1">
+                                            The war that spanned thousands of years has ended. The Shadow Monarch returns to a peaceful Earth, only to find that the peace is built on lies. He must gather his shadow army once more.
+                                        </p>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-4 mt-5 pt-4 border-t border-slate-50">
+<div class="flex flex-wrap gap-2">
+<span class="px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase rounded-md border border-slate-200 text-slate-500">Fantasy</span>
+</div>
+<button class="flex items-center gap-1.5 text-primary font-semibold text-sm hover:opacity-70 transition-opacity">
+<span>Read</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col sm:flex-row items-stretch gap-6 rounded-2xl bg-white border border-slate-100 p-5 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.08)] transition-all duration-300">
+<div class="w-full sm:w-36 shrink-0 bg-slate-200 flex items-center justify-center aspect-[2/3] sm:aspect-[3/4] rounded-xl border border-slate-100 text-slate-400">
+<span class="material-symbols-outlined text-4xl">menu_book</span>
+</div>
+<div class="flex flex-col justify-between py-1 flex-1 min-w-0">
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-start gap-4">
+<h3 class="text-xl font-bold leading-snug truncate text-slate-900 group-hover:text-primary transition-colors">The Alchemist's Paradox</h3>
+<button class="text-slate-400 hover:text-slate-700 transition-colors shrink-0">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</div>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-slate-500">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">person</span> ElaraVane</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">menu_book</span> 420 Ch.</span>
+<span class="flex items-center gap-1.5 text-slate-400"><span class="material-symbols-outlined text-[15px]">schedule</span> Updated 3 days ago</span>
+</div>
+<p class="text-sm leading-relaxed text-slate-500 line-clamp-2 mt-1">
+                                            In a world where magic is treated as a rigid science, one renegade alchemist discovers a flaw in the fundamental laws of reality. Pursued by the grand council, she must unravel the ultimate paradox before reality unwinds itself.
+                                        </p>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-4 mt-5 pt-4 border-t border-slate-50">
+<div class="flex flex-wrap gap-2">
+<span class="px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase rounded-md border border-slate-200 text-slate-500">Mystery</span>
+<span class="px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase rounded-md border border-slate-200 text-slate-500">Magic</span>
+</div>
+<button class="flex items-center gap-1.5 text-primary font-semibold text-sm hover:opacity-70 transition-opacity">
+<span>Read</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-center mt-12 gap-2">
+<button class="flex items-center justify-center size-10 rounded-full border border-slate-200 text-slate-400 cursor-not-allowed">
+<span class="material-symbols-outlined text-xl">chevron_left</span>
+</button>
+<button class="flex items-center justify-center size-10 rounded-full bg-primary text-white font-medium">1</button>
+<button class="flex items-center justify-center size-10 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium">2</button>
+<button class="flex items-center justify-center size-10 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium">3</button>
+<span class="flex items-center justify-center size-10 text-slate-400">...</span>
+<button class="flex items-center justify-center size-10 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium">124</button>
+<button class="flex items-center justify-center size-10 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</button>
+</div>
+</main>
+</div>
+</div>
+</div>
+</div>
+</body></html>

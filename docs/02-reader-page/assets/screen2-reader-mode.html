@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NovelVerse - Reader Mode</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c2bee",
+                        "background-light": "#fafafa",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "serif": ["Merriweather", "serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light text-slate-900 font-sans h-screen flex flex-col overflow-hidden">
+<header class="flex-none flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200 z-10 shadow-sm">
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">The Rebirth of the Supreme Dragon</span>
+<span class="text-sm font-medium text-slate-900">Chapter 1542: The Final Confrontation (Part 3)</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-slate-600">
+<button class="p-2.5 rounded-full hover:bg-slate-100 transition-colors" title="Edit">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2.5 rounded-full hover:bg-slate-100 transition-colors" title="Translate">
+<span class="material-symbols-outlined">translate</span>
+</button>
+<button class="p-2.5 rounded-full hover:bg-slate-100 transition-colors" title="Bookmark">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+<button class="p-2.5 rounded-full hover:bg-slate-100 transition-colors" title="Text-to-Speech">
+<span class="material-symbols-outlined">volume_up</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative">
+<aside class="w-80 flex-none bg-white border-r border-slate-200 flex flex-col h-full z-10 hidden lg:flex">
+<div class="flex items-center border-b border-slate-100">
+<button class="flex-1 py-4 text-sm font-semibold text-primary border-b-2 border-primary">Chapters</button>
+<button class="flex-1 py-4 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Bookmarks</button>
+</div>
+<div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Sort by</span>
+<div class="flex items-center bg-slate-200/50 rounded-lg p-0.5">
+<button class="px-3 py-1 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900">Newest</button>
+<button class="px-3 py-1 text-xs font-semibold rounded-md bg-white shadow-sm text-slate-900">Oldest</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto overflow-x-hidden">
+<div class="flex flex-col p-2">
+<a class="flex flex-col p-3 rounded-lg hover:bg-slate-50 transition-colors group" href="#">
+<span class="text-xs font-medium text-slate-400 mb-1">Chapter 1</span>
+<span class="text-sm font-medium text-slate-700 group-hover:text-primary line-clamp-2">Awakening in a New World</span>
+</a>
+<a class="flex flex-col p-3 rounded-lg hover:bg-slate-50 transition-colors group" href="#">
+<span class="text-xs font-medium text-slate-400 mb-1">Chapter 2</span>
+<span class="text-sm font-medium text-slate-700 group-hover:text-primary line-clamp-2">The Legacy of the Dragon</span>
+</a>
+<a class="flex flex-col p-3 rounded-lg hover:bg-slate-50 transition-colors group" href="#">
+<span class="text-xs font-medium text-slate-400 mb-1">Chapter 3</span>
+<span class="text-sm font-medium text-slate-700 group-hover:text-primary line-clamp-2">First Trial</span>
+</a>
+<div class="py-2 text-center text-xs text-slate-300 font-medium">...</div>
+<a class="flex flex-col p-3 rounded-lg hover:bg-slate-50 transition-colors group" href="#">
+<span class="text-xs font-medium text-slate-400 mb-1">Chapter 1541</span>
+<span class="text-sm font-medium text-slate-700 group-hover:text-primary line-clamp-2">The Final Confrontation (Part 2)</span>
+</a>
+<a class="flex flex-col p-3 rounded-lg bg-primary/5 border border-primary/20 transition-colors group" href="#">
+<span class="text-xs font-semibold text-primary mb-1">Chapter 1542</span>
+<span class="text-sm font-semibold text-slate-900 line-clamp-2">The Final Confrontation (Part 3)</span>
+</a>
+</div>
+</div>
+</aside>
+<main class="flex-1 h-full overflow-y-auto bg-background-light">
+<div class="max-w-3xl mx-auto px-8 py-16 md:px-12 lg:px-16 min-h-full flex flex-col">
+<article class="flex-1 font-serif">
+<h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-12 leading-tight text-center font-sans">Chapter 1542<br/><span class="text-2xl md:text-3xl text-slate-700 font-medium mt-4 block">The Final Confrontation (Part 3)</span></h1>
+<div class="prose prose-lg prose-slate max-w-none text-slate-800 leading-relaxed space-y-6">
+<p>The sky above the Azure Peak was a maelstrom of violent energies. Crimson lightning arced through the blackened clouds, illuminating the desolate landscape below. At the center of this storm stood Lin Xuan, his aura flaring like a localized sun, pushing back the overwhelming darkness that threatened to consume the realm.</p>
+<p>Before him, floating effortlessly in the air, was the Demon Sovereign. The entity's eyes were pits of pure void, reflecting neither light nor hope. "You fight a losing battle, Dragon Emperor," the Sovereign's voice resonated not in the air, but directly within Lin Xuan's mind, a chilling whisper that promised only oblivion.</p>
+<p>"As long as a single ember remains, the flame can be reborn," Lin Xuan retorted, gripping the handle of the Heaven-Splitting Halberd tighter. The divine weapon hummed in resonance with his supreme dragon bloodline, casting a golden glow that chased away the encroaching shadows.</p>
+<p>With a thunderous roar, Lin Xuan launched himself upward. The ground beneath him shattered from the sheer force of his takeoff. He became a streak of golden light, tearing through the demonic energy fields. The Halberd swept forward in a devastating arc, unleashing a wave of draconic power that took the form of a massive, roaring golden dragon.</p>
+<p>The Demon Sovereign merely raised a hand. A shield of compressed dark matter materialized instantly. The clash of absolute light and ultimate darkness created a shockwave that flattened mountains miles away. Space itself fractured, leaving jagged rifts that revealed the chaotic void beyond.</p>
+<p>Breathing heavily, Lin Xuan landed on a floating chunk of debris. He knew this single strike wasn't enough. He had to unlock the final seal of the Supreme Dragon. Closing his eyes for a fraction of a second, he focused on his core, where a tiny, dormant crystalline structure lay waiting.</p>
+<p>"Ignite," he commanded his soul.</p>
+</div>
+</article>
+<div class="mt-20 pt-8 border-t border-slate-200 flex items-center justify-between font-sans">
+<button class="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-medium hover:bg-slate-50 transition-colors shadow-sm">
+<span class="material-symbols-outlined">arrow_back</span>
+                        Previous Chapter
+                    </button>
+<button class="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors shadow-sm">
+                        Next Chapter
+                        <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+<aside class="w-80 flex-none bg-white border-l border-slate-200 flex flex-col h-full z-10 hidden xl:flex">
+<div class="p-5 border-b border-slate-100 flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400">tune</span>
+<h2 class="text-base font-semibold text-slate-800">Reading Experience</h2>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-8">
+<div>
+<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Font Family</h3>
+<div class="grid grid-cols-2 gap-3">
+<button class="py-3 px-4 border-2 border-primary rounded-xl text-sm font-medium text-primary bg-primary/5 font-serif text-center">
+                            Serif
+                        </button>
+<button class="py-3 px-4 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:border-slate-300 hover:bg-slate-50 font-sans text-center transition-colors">
+                            Sans-Serif
+                        </button>
+</div>
+</div>
+<div>
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Font Size</h3>
+<span class="text-sm font-medium text-slate-700">18px</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm text-slate-400">A</span>
+<input class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" max="24" min="12" type="range" value="18"/>
+<span class="text-lg text-slate-400 font-medium">A</span>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Line Height</h3>
+<div class="grid grid-cols-3 gap-2">
+<button class="py-2 border border-slate-200 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors" title="Compact">
+<span class="material-symbols-outlined text-slate-500">format_line_spacing</span>
+</button>
+<button class="py-2 border-2 border-primary rounded-lg flex items-center justify-center bg-primary/5" title="Comfortable">
+<span class="material-symbols-outlined text-primary">format_line_spacing</span>
+</button>
+<button class="py-2 border border-slate-200 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors" title="Spacious">
+<span class="material-symbols-outlined text-slate-500">format_line_spacing</span>
+</button>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Paragraph Spacing</h3>
+<div class="grid grid-cols-3 gap-2">
+<button class="py-2 border-2 border-primary rounded-lg flex items-center justify-center bg-primary/5 text-sm font-medium text-primary">
+                            Small
+                        </button>
+<button class="py-2 border border-slate-200 rounded-lg flex items-center justify-center hover:bg-slate-50 text-sm font-medium text-slate-600 transition-colors">
+                            Med
+                        </button>
+<button class="py-2 border border-slate-200 rounded-lg flex items-center justify-center hover:bg-slate-50 text-sm font-medium text-slate-600 transition-colors">
+                            Large
+                        </button>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Theme</h3>
+<div class="grid grid-cols-4 gap-3">
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-[#fafafa] border-2 border-primary shadow-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm">check</span>
+</div>
+<span class="text-xs font-medium text-primary">Light</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-[#f4ecd8] border border-slate-200 shadow-sm group-hover:border-slate-400 transition-colors"></div>
+<span class="text-xs font-medium text-slate-500 group-hover:text-slate-700">Sepia</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-[#1e293b] border border-slate-200 shadow-sm group-hover:border-slate-400 transition-colors"></div>
+<span class="text-xs font-medium text-slate-500 group-hover:text-slate-700">Dark</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-black border border-slate-200 shadow-sm group-hover:border-slate-400 transition-colors"></div>
+<span class="text-xs font-medium text-slate-500 group-hover:text-slate-700">OLED</span>
+</button>
+</div>
+</div>
+<div class="pt-8 border-t border-slate-200">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-slate-400">record_voice_over</span>
+<h2 class="text-base font-semibold text-slate-800">Text-to-Speech</h2>
+</div>
+<div class="space-y-8">
+<div>
+<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Voice Selection</h3>
+<select class="w-full bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl focus:ring-primary focus:border-primary block p-3 outline-none hover:border-slate-300 transition-colors cursor-pointer">
+<option>Female - Soft</option>
+<option>Male - Deep</option>
+<option>Female - Energetic</option>
+<option>Male - Calm</option>
+</select>
+</div>
+<div>
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Speed Control</h3>
+<span class="text-sm font-medium text-slate-700">1.0x</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-xs font-medium text-slate-400">0.5x</span>
+<input class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" max="2" min="0.5" step="0.1" type="range" value="1.0"/>
+<span class="text-xs font-medium text-slate-400">2.0x</span>
+</div>
+</div>
+<div>
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pitch Adjustment</h3>
+<span class="text-sm font-medium text-slate-700">Normal</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-xs font-medium text-slate-400">Low</span>
+<input class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" max="2" min="0" step="0.1" type="range" value="1.0"/>
+<span class="text-xs font-medium text-slate-400">High</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Auto-Scroll</h3>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+
+</body></html>

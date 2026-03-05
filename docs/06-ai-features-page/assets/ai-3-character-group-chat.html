@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NovelVerse - AI Group Chat Interface</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c2bee",
+                        "background-light": "#fafafa",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light text-slate-900 font-sans h-screen overflow-hidden flex flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 px-8 py-4 bg-white z-10 shrink-0">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-slate-900">
+<div class="size-6 text-primary">
+<span class="material-symbols-outlined text-2xl">auto_stories</span>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-tight">NovelVerse</h2>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<nav class="hidden lg:flex items-center gap-8">
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">Library</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">Explore</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">Crawler</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#">Uploader</a>
+<a class="text-slate-900 text-sm font-semibold" href="#">AI Features</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 border border-slate-200 cursor-pointer" data-alt="User profile avatar placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCtnPRw_swXi_X-9x05bPlHudlux7Z55xkHhwsURZ3eDwxfoBBiGLI-Bq5LmCF1jUmPKCgweir5FmH6aYHo5W7CIDLARlIqS5eZfPFyu1z3rNDpgiGibCGw-o0ZiKjnGsRO8J50c_bKQpSuWrp3qU_MK67EDOWSiST6LFixZSt1bxwckympeuZdW5i_Mx85nmwXOgFTjw-Mv963Z89fgxyQairki5ZwW0LE1TvMo3r_rXsOryyoxaXv66uZi99NCGl_KecLlKk6vQ");'></div>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<aside class="w-80 border-r border-slate-200 bg-white flex flex-col shrink-0">
+<div class="p-6 border-b border-slate-100">
+<h3 class="font-bold text-lg mb-4">Group Management</h3>
+<div class="relative mb-6">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-primary focus:border-primary" placeholder="Add Character..." type="text"/>
+</div>
+<h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Active Members (3)</h4>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">LF</div>
+<div>
+<p class="text-sm font-medium leading-none">Lin Fan</p>
+<p class="text-[10px] text-slate-500 mt-1">System Architect</p>
+</div>
+</div>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs">SM</div>
+<div>
+<p class="text-sm font-medium leading-none">Shadow Monarch</p>
+<p class="text-[10px] text-slate-500 mt-1">Abyssal Descent</p>
+</div>
+</div>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-xs">EB</div>
+<div>
+<p class="text-sm font-medium leading-none">Elder Bai</p>
+<p class="text-[10px] text-slate-500 mt-1">Supreme Dragon</p>
+</div>
+</div>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+</div>
+</div>
+<div class="p-6 flex-1 overflow-y-auto">
+<h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Scenario Context</h4>
+<textarea class="w-full h-32 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-primary focus:border-primary resize-none" placeholder="Define the context of the conversation... e.g., 'A tense standoff at the tavern'">A mysterious artifact has appeared in the neutral zone. Lin Fan wants to study its code, Shadow Monarch wants to consume its energy, and Elder Bai wants to seal it for the sect.</textarea>
+<button class="mt-4 w-full bg-slate-900 text-white font-medium py-2 rounded-lg hover:bg-slate-800 transition-colors text-sm">Update Scenario</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col bg-background-light relative">
+<div class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm z-10">
+<div class="flex items-center gap-4">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center text-blue-600 font-bold text-xs z-30">LF</div>
+<div class="w-8 h-8 rounded-full bg-purple-100 border-2 border-white flex items-center justify-center text-purple-600 font-bold text-xs z-20">SM</div>
+<div class="w-8 h-8 rounded-full bg-emerald-100 border-2 border-white flex items-center justify-center text-emerald-600 font-bold text-xs z-10">EB</div>
+</div>
+<div>
+<h2 class="font-bold text-slate-900 text-sm">Artifact Dispute</h2>
+<p class="text-xs text-slate-500 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> AI Auto-Chat Paused
+                    </p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-sm">play_arrow</span> Resume Auto
+                </button>
+<button class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+<div class="flex gap-4 max-w-3xl">
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm shrink-0 mt-1">LF</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs font-medium text-slate-500 ml-1">Lin Fan</span>
+<div class="bg-white border border-slate-200 p-4 rounded-2xl rounded-tl-sm shadow-sm text-sm text-slate-700 leading-relaxed">
+<p>*Adjusts glasses, scanning the glowing cube with a translucent monocle*</p>
+<p class="mt-2">Fascinating. The foundational logic of this artifact is written in an ancient dao-script I haven't encountered before. It seems to be leaking raw energy variables. I'll need to run a decompilation sequence before any of you touch it.</p>
+</div>
+</div>
+</div>
+<div class="flex gap-4 max-w-3xl self-end flex-row-reverse">
+<div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-sm shrink-0 mt-1">SM</div>
+<div class="flex flex-col gap-1 items-end">
+<span class="text-xs font-medium text-slate-500 mr-1">Shadow Monarch</span>
+<div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl rounded-tr-sm shadow-sm text-sm text-slate-200 leading-relaxed text-right">
+<p>*Shadows writhe around his boots as he steps forward*</p>
+<p class="mt-2">Your toys are meaningless, Architect. This cube reeks of the Void. It belongs to the abyss, and its power will feed my legion. Step aside before I incorporate your shadow into my vanguard.</p>
+</div>
+</div>
+</div>
+<div class="flex gap-4 max-w-3xl">
+<div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-sm shrink-0 mt-1">EB</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs font-medium text-slate-500 ml-1">Elder Bai</span>
+<div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl rounded-tl-sm shadow-sm text-sm text-slate-700 leading-relaxed">
+<p>*Strokes his long white beard, a jade talisman glowing softly in his hand*</p>
+<p class="mt-2">Junior Lin, Lord of Shadows... restrain yourselves. This object emanates a pure, uncorrupted Qi. If mishandled, it could shatter the planar boundaries. The Supreme Dragon Sect will take custody of it for safe keeping in the Heaven Sealing Array.</p>
+</div>
+</div>
+</div>
+<div class="flex gap-4 max-w-3xl">
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm shrink-0 mt-1">LF</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs font-medium text-slate-500 ml-1">Lin Fan</span>
+<div class="bg-white border border-slate-200 p-4 rounded-2xl rounded-tl-sm shadow-sm text-sm text-slate-700 leading-relaxed">
+<p>"Safe keeping?" Please. Your sect's security protocols are basically open-source to anyone past the Core Formation realm. And you, edge-lord, eating random artifacts is how you get malware in your soul.</p>
+</div>
+<div class="flex gap-2 mt-1 ml-1 opacity-0 hover:opacity-100 transition-opacity">
+<button class="text-xs text-slate-400 hover:text-primary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit</span> Edit</button>
+<button class="text-xs text-slate-400 hover:text-red-500 flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">delete</span> Delete</button>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white border-t border-slate-200 p-4 shrink-0 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] z-10">
+<div class="max-w-4xl mx-auto flex items-end gap-3">
+<button class="p-3 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-colors shrink-0 mb-0.5" title="Regenerate last response">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+<div class="flex-1 relative">
+<textarea class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-4 pr-12 text-sm focus:ring-primary focus:border-primary resize-none h-14" placeholder="Intervene as the Author or ask a question to the group..."></textarea>
+<button class="absolute right-2 bottom-2 p-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-sm">send</span>
+</button>
+</div>
+</div>
+<div class="text-center mt-2">
+<span class="text-[10px] text-slate-400">AI Characters generate responses autonomously when "Auto-Chat" is active. Intervening pauses the auto-chat.</span>
+</div>
+</div>
+</main>
+<aside class="w-72 border-l border-slate-200 bg-white flex flex-col shrink-0">
+<div class="p-4 border-b border-slate-100 flex items-center justify-between">
+<h3 class="font-bold text-sm text-slate-800">Group Context</h3>
+<button class="text-slate-400 hover:text-slate-700">
+<span class="material-symbols-outlined text-sm">menu_open</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
+<div>
+<h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1"><span class="material-symbols-outlined text-xs">book</span> Knowledge Limits</h4>
+<div class="flex flex-col gap-3">
+<div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+<div class="flex justify-between text-xs mb-1">
+<span class="font-medium text-slate-700">Lin Fan</span>
+<span class="text-primary font-medium">Ch. 240</span>
+</div>
+<div class="w-full bg-slate-200 rounded-full h-1 mt-2">
+<div class="bg-primary h-1 rounded-full" style="width: 45%"></div>
+</div>
+</div>
+<div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+<div class="flex justify-between text-xs mb-1">
+<span class="font-medium text-slate-700">Shadow Monarch</span>
+<span class="text-primary font-medium">Ch. 890</span>
+</div>
+<div class="w-full bg-slate-200 rounded-full h-1 mt-2">
+<div class="bg-primary h-1 rounded-full" style="width: 85%"></div>
+</div>
+</div>
+<div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+<div class="flex justify-between text-xs mb-1">
+<span class="font-medium text-slate-700">Elder Bai</span>
+<span class="text-primary font-medium">Ch. 12</span>
+</div>
+<div class="w-full bg-slate-200 rounded-full h-1 mt-2">
+<div class="bg-primary h-1 rounded-full" style="width: 15%"></div>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1"><span class="material-symbols-outlined text-xs">memory</span> Memory Log</h4>
+<div class="relative pl-3 border-l-2 border-slate-100 flex flex-col gap-4">
+<div class="relative">
+<div class="absolute -left-[17px] top-1 w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-white"></div>
+<p class="text-xs font-medium text-slate-700 mb-0.5">Artifact Discovered</p>
+<p class="text-[10px] text-slate-500">Group converged on a glowing cube in the neutral zone.</p>
+</div>
+<div class="relative">
+<div class="absolute -left-[17px] top-1 w-2.5 h-2.5 rounded-full bg-slate-300 ring-4 ring-white"></div>
+<p class="text-xs font-medium text-slate-700 mb-0.5">Intentions Revealed</p>
+<p class="text-[10px] text-slate-500">Lin Fan wants to decode it, SM wants to consume it, Bai wants to seal it.</p>
+</div>
+<div class="relative">
+<div class="absolute -left-[17px] top-1 w-2.5 h-2.5 rounded-full bg-slate-300 ring-4 ring-white"></div>
+<p class="text-xs font-medium text-slate-700 mb-0.5">Lin Fan insults Sect</p>
+<p class="text-[10px] text-slate-500">LF mocked the Supreme Dragon Sect's security arrays.</p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</body></html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>NovelVerse - My Bookmarks</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c2bee",
+                        "background-light": "#fafafa",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light text-slate-900 font-sans min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<div class="px-8 md:px-12 lg:px-20 flex flex-1 justify-center py-5">
+<div class="layout-content-container flex flex-col max-w-[1200px] flex-1 w-full">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 pb-6 pt-4 mb-8">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-slate-900">
+<div class="size-6 text-primary">
+<span class="material-symbols-outlined text-2xl" style="">auto_stories</span>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-tight" style="">NovelVerse</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64" style="">
+<div class="flex w-full flex-1 items-stretch rounded-full h-full bg-slate-100/80 border border-slate-200/50 focus-within:border-slate-300 transition-colors">
+<div class="text-slate-400 flex items-center justify-center pl-4 rounded-l-full">
+<span class="material-symbols-outlined text-xl" style="">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 bg-transparent text-slate-900 focus:outline-0 focus:ring-0 border-none h-full placeholder:text-slate-400 px-3 text-sm font-medium leading-normal" placeholder="Search novels..." value="">
+</div>
+</label>
+</div>
+<div class="flex items-center gap-8">
+<nav class="hidden lg:flex items-center gap-8">
+<a class="text-slate-900 text-sm font-semibold" href="#" style="">Library</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#" style="">Explore</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#" style="">Crawler</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#" style="">Uploader</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium" href="#" style="">AI Features</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 border border-slate-200 cursor-pointer" data-alt="User profile avatar placeholder" style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuCtnPRw_swXi_X-9x05bPlHudlux7Z55xkHhwsURZ3eDwxfoBBiGLI-Bq5LmCF1jUmPKCgweir5FmH6aYHo5W7CIDLARlIqS5eZfPFyu1z3rNDpgiGibCGw-o0ZiKjnGsRO8J50c_bKQpSuWrp3qU_MK67EDOWSiST6LFixZSt1bxwckympeuZdW5i_Mx85nmwXOgFTjw-Mv963Z89fgxyQairki5ZwW0LE1TvMo3r_rXsOryyoxaXv66uZi99NCGl_KecLlKk6vQ&quot;);"></div>
+<div class="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+<div class="py-1">
+<a class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900" href="#" style="">
+<span class="material-symbols-outlined text-lg" style="">settings</span>Settings
+</a>
+<a class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900" href="#" style="">
+<span class="material-symbols-outlined text-lg" style="">logout</span>Log out
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 pb-16">
+<div class="flex flex-col gap-2 mb-10">
+<h1 class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900" style="">My Library</h1>
+<p class="text-slate-500 text-base" style="">Manage your saved reading positions</p>
+</div>
+<div class="mb-8 flex items-end justify-between border-b border-slate-200 gap-4">
+<div class="flex gap-8 overflow-x-auto w-full no-scrollbar">
+<a class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 hover:text-slate-800 pb-3 pt-2 transition-colors whitespace-nowrap" href="#" style="">
+<p class="text-sm font-medium" style="">All</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 hover:text-slate-800 pb-3 pt-2 transition-colors whitespace-nowrap" href="#" style="">
+<p class="text-sm font-medium" style="">Reading</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 hover:text-slate-800 pb-3 pt-2 transition-colors whitespace-nowrap" href="#" style="">
+<p class="text-sm font-medium" style="">Completed</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 hover:text-slate-800 pb-3 pt-2 transition-colors whitespace-nowrap" href="#" style="">
+<p class="text-sm font-medium" style="">Read Later</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 hover:text-slate-800 pb-3 pt-2 transition-colors whitespace-nowrap" href="#" style="">
+<p class="text-sm font-medium" style="">My Collections</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-2 border-slate-900 text-slate-900 pb-3 pt-2 whitespace-nowrap" href="#" style="">
+<p class="text-sm font-semibold" style="">My Bookmarks</p>
+</a>
+</div>
+<div class="pb-2 hidden sm:flex shrink-0">
+<button class="flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-900 transition-colors hover:bg-slate-200 whitespace-nowrap" style="">
+<span class="material-symbols-outlined text-lg" style="">add</span>
+Create Collection
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-12">
+<div class="flex flex-col gap-5">
+<div class="flex items-center gap-4 px-2">
+<div class="w-12 h-16 shrink-0 bg-center bg-no-repeat bg-cover rounded-md border border-slate-200 shadow-sm" data-alt="Vertical novel cover for Supreme Dragon" style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDph21aR1KMeBmh2hN5ZflN5xtZd9wxIH4hPiYMgo7DVGHBpoQSwty78DKnzka8OPRKwJBhQBWcC5N-gXlT6csiEBQqD6Vzlf3UGoadPHSp2OEux-O2rI8MNr7oK3tfXiAKVyTdtuuDCF-jMx-gnJ2uTh6IeCeZQX_7G-STSCZDKAboee9Sm9HRvdRnej7Yo8aIbsTgo-eURRKQTrc_KAxtEZYGURzKzAnUcDBJ9FFQJ0olGrlztTC2C1zK7_n1DdQt918wi9Hrfw&quot;);"></div>
+<h3 class="text-xl font-bold text-slate-900" style="">The Rebirth of the Supreme Dragon</h3>
+</div>
+<div class="flex flex-col bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+<a class="group flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors" href="#" style="">
+<div class="flex items-center gap-4 mb-2 sm:mb-0">
+<span class="material-symbols-outlined text-primary/80" style="">bookmark</span>
+<div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+<span class="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors" style="">Chapter 45</span>
+<span class="hidden sm:inline text-slate-300" style="">|</span>
+<span class="text-sm text-slate-600 font-medium" style="">The Hidden Truth</span>
+</div>
+</div>
+<div class="flex items-center sm:justify-end gap-3 pl-10 sm:pl-0">
+<span class="text-xs font-medium text-slate-400" style="">Oct 24, 2023</span>
+<button class="text-slate-300 hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity p-1" style="">
+<span class="material-symbols-outlined text-lg" style="">more_horiz</span>
+</button>
+</div>
+</a>
+<a class="group flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors" href="#" style="">
+<div class="flex items-center gap-4 mb-2 sm:mb-0">
+<span class="material-symbols-outlined text-primary/80" style="">bookmark</span>
+<div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+<span class="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors" style="">Chapter 102</span>
+<span class="hidden sm:inline text-slate-300" style="">|</span>
+<span class="text-sm text-slate-600 font-medium" style="">Betrayal</span>
+</div>
+</div>
+<div class="flex items-center sm:justify-end gap-3 pl-10 sm:pl-0">
+<span class="text-xs font-medium text-slate-400" style="">Nov 02, 2023</span>
+<button class="text-slate-300 hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity p-1" style="">
+<span class="material-symbols-outlined text-lg" style="">more_horiz</span>
+</button>
+</div>
+</a>
+<a class="group flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 transition-colors" href="#" style="">
+<div class="flex items-center gap-4 mb-2 sm:mb-0">
+<span class="material-symbols-outlined text-primary/80" style="">bookmark</span>
+<div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+<span class="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors" style="">Chapter 156</span>
+<span class="hidden sm:inline text-slate-300" style="">|</span>
+<span class="text-sm text-slate-600 font-medium" style="">The Dragon Awakens</span>
+</div>
+</div>
+<div class="flex items-center sm:justify-end gap-3 pl-10 sm:pl-0">
+<span class="text-xs font-medium text-slate-400" style="">Nov 15, 2023</span>
+<button class="text-slate-300 hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity p-1" style="">
+<span class="material-symbols-outlined text-lg" style="">more_horiz</span>
+</button>
+</div>
+</a>
+</div>
+</div>
+<div class="flex flex-col gap-5">
+<div class="flex items-center gap-4 px-2">
+<div class="w-12 h-16 shrink-0 bg-center bg-no-repeat bg-cover rounded-md border border-slate-200 shadow-sm" data-alt="Vertical novel cover for System Architect" style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAWtMY5i9DpaOmqmfUsRAwIJvGAq4QDB1i0URPJCInGWexdpjr0cmnJ7d7lGbX3pSx7naVzdF4hdcGg-GIRP3eTSH4FYDKEH8BZq6nemYBsAxazOIBRfhrczC2w_2E5nkm2n8pf4OQ_xJbD4Pt4iWTk5dA7FaK7uTGXYGX0zl4qkYlWn2LatkmRrDWCWVjq9vTH4JoPRT_G5OQ5dDnhOed-_pRgcXde0C6iD6oxI05iUMrwb8pr79ROFJwuRJqxozHB5PvKKn03-A&quot;);"></div>
+<h3 class="text-xl font-bold text-slate-900" style="">System Architect: Building Heavens</h3>
+</div>
+<div class="flex flex-col bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+<a class="group flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 transition-colors" href="#" style="">
+<div class="flex items-center gap-4 mb-2 sm:mb-0">
+<span class="material-symbols-outlined text-primary/80" style="">bookmark</span>
+<div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+<span class="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors" style="">Chapter 12</span>
+<span class="hidden sm:inline text-slate-300" style="">|</span>
+<span class="text-sm text-slate-600 font-medium" style="">Hello World, Tribulation Style</span>
+</div>
+</div>
+<div class="flex items-center sm:justify-end gap-3 pl-10 sm:pl-0">
+<span class="text-xs font-medium text-slate-400" style="">Yesterday</span>
+<button class="text-slate-300 hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity p-1" style="">
+<span class="material-symbols-outlined text-lg" style="">more_horiz</span>
+</button>
+</div>
+</a>
+</div>
+</div>
+<div class="flex flex-col gap-5">
+<div class="flex items-center gap-4 px-2">
+<div class="w-12 h-16 shrink-0 bg-center bg-no-repeat bg-cover rounded-md border border-slate-200 shadow-sm" data-alt="Vertical novel cover for Shadow Monarch" style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuACOtbXtIulQJtfXCV5cdbMDsgNar4zmg9WOFSAN70jAOCyEOHr0blj7uFWqSPGF2BDVQ-NEtLnySepi32bn4H1PHrQ2mKy3u3oAW7A5JxG7mdGgrIRmYhLcO886uJQ36bYsL7OGzLsCnThEYWB0ZTNUQEs7nYptf9y4XaYNkSXovb1-TZg9_BK36L4VfLb9uHg2T5fM-mKsfFL-aFEHqMd7EWJqDpSHTfsmL4SSWeQ404TJ58TDspqEhgvtuTG_Gdq5pKiUnR0LQ&quot;);"></div>
+<h3 class="text-xl font-bold text-slate-900" style="">Shadow Monarch's Return</h3>
+</div>
+<div class="flex flex-col bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+<a class="group flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors" href="#" style="">
+<div class="flex items-center gap-4 mb-2 sm:mb-0">
+<span class="material-symbols-outlined text-primary/80" style="">bookmark</span>
+<div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+<span class="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors" style="">Chapter 1</span>
+<span class="hidden sm:inline text-slate-300" style="">|</span>
+<span class="text-sm text-slate-600 font-medium" style="">The End of the War</span>
+</div>
+</div>
+<div class="flex items-center sm:justify-end gap-3 pl-10 sm:pl-0">
+<span class="text-xs font-medium text-slate-400" style="">Sep 01, 2023</span>
+<button class="text-slate-300 hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity p-1" style="">
+<span class="material-symbols-outlined text-lg" style="">more_horiz</span>
+</button>
+</div>
+</a>
+<a class="group flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 transition-colors" href="#" style="">
+<div class="flex items-center gap-4 mb-2 sm:mb-0">
+<span class="material-symbols-outlined text-primary/80" style="">bookmark</span>
+<div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+<span class="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors" style="">Chapter 500</span>
+<span class="hidden sm:inline text-slate-300" style="">|</span>
+<span class="text-sm text-slate-600 font-medium" style="">A New Beginning</span>
+</div>
+</div>
+<div class="flex items-center sm:justify-end gap-3 pl-10 sm:pl-0">
+<span class="text-xs font-medium text-slate-400" style="">Oct 10, 2023</span>
+<button class="text-slate-300 hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity p-1" style="">
+<span class="material-symbols-outlined text-lg" style="">more_horiz</span>
+</button>
+</div>
+</a>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</div>
+</div>
+</body></html>
