@@ -2,14 +2,29 @@
 import { createClient } from "@/lib/supabase/client";
 import { LibraryEntry, CollectionData, BookmarkGroup } from "../types/library";
 
-export const libraryApi = {
-  getLibrary: async (status?: string): Promise<LibraryEntry[]> => {
-    const supabase = createClient();
+export interface LibraryFilters {
+  readingStatus?: string;
+  search?: string;
+  publicationStatus?: string;
+  chapterRange?: string;
+  tags?: string[];
+  sort?: string;
+}
 
-    let query = supabase
-      .from("library_entries")
-      .select(
-        `
+export const libraryApi = {
+  getLibrary: async (filters: LibraryFilters = {}): Promise<LibraryEntry[]> => {
+    const supabase = createClient();
+    const {
+      readingStatus,
+      search,
+      publicationStatus,
+      chapterRange,
+      tags,
+      sort = "recently-read",
+    } = filters;
+
+    let query = supabase.from("library_entries").select(
+      `
         id,
         reading_status,
         current_chapter_id,
@@ -25,11 +40,76 @@ export const libraryApi = {
           publication_status
         )
       `,
-      )
-      .order("updated_at", { ascending: false });
+    );
 
-    if (status && status !== "all") {
-      query = query.eq("reading_status", status);
+    // Tab-level reading status filter
+    if (readingStatus && readingStatus !== "all") {
+      query = query.eq("reading_status", readingStatus);
+    }
+
+    // Search filter — matches title or author on the joined novel
+    if (search && search.trim()) {
+      const term = `%${search.trim()}%`;
+      query = query.or(`title_raw.ilike.${term},author_raw.ilike.${term}`, {
+        referencedTable: "novels",
+      });
+    }
+
+    // Publication status filter
+    if (publicationStatus && publicationStatus !== "all") {
+      query = query.eq("novels.publication_status", publicationStatus);
+    }
+
+    // Chapter range filter
+    if (chapterRange && chapterRange !== "any") {
+      switch (chapterRange) {
+        case "1-100":
+          query = query
+            .gte("novels.total_chapters", 1)
+            .lte("novels.total_chapters", 100);
+          break;
+        case "101-500":
+          query = query
+            .gte("novels.total_chapters", 101)
+            .lte("novels.total_chapters", 500);
+          break;
+        case "501-1000":
+          query = query
+            .gte("novels.total_chapters", 501)
+            .lte("novels.total_chapters", 1000);
+          break;
+        case "1000+":
+          query = query.gte("novels.total_chapters", 1000);
+          break;
+      }
+    }
+
+    // Genre tags filter (AND logic — novel must contain ALL selected tags)
+    if (tags && tags.length > 0) {
+      query = query.contains("novels.genres", tags);
+    }
+
+    // Sort order
+    switch (sort) {
+      case "recently-added":
+        query = query.order("updated_at", { ascending: false });
+        break;
+      case "alphabetical":
+        query = query.order("title_raw", {
+          ascending: true,
+          referencedTable: "novels",
+        });
+        break;
+      case "chapters-high":
+        query = query.order("total_chapters", {
+          ascending: false,
+          referencedTable: "novels",
+        });
+        break;
+      case "recently-read":
+      default:
+        query = query.order("updated_at", { ascending: false });
+        break;
     }
 
     const { data, error } = await query;
@@ -38,24 +118,49 @@ export const libraryApi = {
       throw error;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (data as any[]).map((item) => ({
-      id: item.id,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      reading_status: item.reading_status as any,
-      current_chapter_id: item.current_chapter_id,
-      updated_at: item.updated_at,
-      novel: {
-        id: item.novel.id,
-        title: item.novel.title || "",
-        author: item.novel.author || "",
-        cover_url: item.novel.cover_url,
-        description: item.novel.description || "",
-        genres: item.novel.genres || [],
-        total_chapters: item.novel.total_chapters || 0,
-        publication_status: item.novel.publication_status || "ongoing",
-      },
-    }));
+    return (data as any[])
+      .filter((item) => item.novel !== null)
+      .map((item) => ({
+        id: item.id,
+        reading_status: item.reading_status as any,
+        current_chapter_id: item.current_chapter_id,
+        updated_at: item.updated_at,
+        novel: {
+          id: item.novel.id,
+          title: item.novel.title || "",
+          author: item.novel.author || "",
+          cover_url: item.novel.cover_url,
+          description: item.novel.description || "",
+          genres: item.novel.genres || [],
+          total_chapters: item.novel.total_chapters || 0,
+          publication_status: item.novel.publication_status || "ongoing",
+        },
+      }));
+  },
+
+  getDistinctGenres: async (): Promise<string[]> => {
+    const supabase = createClient();
+
+    // Fetch all genres arrays from novels that are in the user's library
+    const { data, error } = await supabase
+      .from("library_entries")
+      .select("novel:novels ( genres )");
+
+    if (error) {
+      console.error("Supabase getDistinctGenres error:", error);
+      throw error;
+    }
+
+    const genreSet = new Set<string>();
+    for (const entry of data as any[]) {
+      if (entry.novel?.genres) {
+        for (const g of entry.novel.genres) {
+          if (g) genreSet.add(g);
+        }
+      }
+    }
+
+    return Array.from(genreSet).sort();
   },
 
   getCollections: async (): Promise<CollectionData[]> => {
@@ -79,10 +184,8 @@ export const libraryApi = {
       throw error;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (cols as any[]).map((c) => {
       const allCovers = c.collection_novels
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .map((cn: any) => cn.novel?.cover_url)
         .filter(Boolean);
 
@@ -116,10 +219,7 @@ export const libraryApi = {
     }
 
     const map = new Map<string, BookmarkGroup>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const b of data as any[]) {
-      // Supabase inner join objects could be arrays if one-to-many,
-      // but here they are singular references to parent tables
       const nid = b.novel.id;
       if (!map.has(nid)) {
         map.set(nid, {

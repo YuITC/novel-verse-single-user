@@ -2,17 +2,36 @@ import React from "react";
 import { NovelCard } from "./NovelCard";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { libraryApi } from "../api/libraryApi";
+import { ToolbarFilters } from "./LibraryToolbar";
 
 interface NovelCardGridProps {
   filterStatus?: string;
+  toolbarFilters?: ToolbarFilters;
 }
 
 export const NovelCardGrid: React.FC<NovelCardGridProps> = ({
   filterStatus,
+  toolbarFilters,
 }) => {
   const { data: entries } = useSuspenseQuery({
-    queryKey: ["library", filterStatus || "all"],
-    queryFn: () => libraryApi.getLibrary(filterStatus),
+    queryKey: [
+      "library",
+      filterStatus || "all",
+      toolbarFilters?.search || "",
+      toolbarFilters?.publicationStatus || "all",
+      toolbarFilters?.chapterRange || "any",
+      toolbarFilters?.sort || "recently-read",
+      toolbarFilters?.tags?.join(",") || "",
+    ],
+    queryFn: () =>
+      libraryApi.getLibrary({
+        readingStatus: filterStatus,
+        search: toolbarFilters?.search,
+        publicationStatus: toolbarFilters?.publicationStatus,
+        chapterRange: toolbarFilters?.chapterRange,
+        tags: toolbarFilters?.tags,
+        sort: toolbarFilters?.sort,
+      }),
   });
 
   if (!entries || entries.length === 0) {
@@ -22,15 +41,18 @@ export const NovelCardGrid: React.FC<NovelCardGridProps> = ({
           auto_stories
         </span>
         <h3 className="text-xl font-bold text-slate-900 mb-2">
-          No novels here yet
+          No novels found
         </h3>
         <p className="text-sm text-slate-500 mb-6 max-w-sm">
-          Discover new stories in the Explore tab or import them via the Crawler
-          to get started.
+          {toolbarFilters?.search ||
+          toolbarFilters?.tags?.length ||
+          (toolbarFilters?.publicationStatus &&
+            toolbarFilters.publicationStatus !== "all") ||
+          (toolbarFilters?.chapterRange &&
+            toolbarFilters.chapterRange !== "any")
+            ? "No novels match your current filters. Try adjusting your search or filter criteria."
+            : "Import novels via the Crawler or Uploader to get started."}
         </p>
-        <button className="px-6 py-2 rounded-full bg-slate-900 text-white font-medium text-sm hover:bg-slate-800 transition-colors">
-          Explore Novels
-        </button>
       </div>
     );
   }

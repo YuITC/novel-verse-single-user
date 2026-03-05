@@ -4,6 +4,7 @@ import React, { useState, Suspense } from "react";
 import { NovelCardGrid } from "./NovelCardGrid";
 import { CollectionCardGrid } from "./CollectionCardGrid";
 import { BookmarkList } from "./BookmarkList";
+import { LibraryToolbar, ToolbarFilters } from "./LibraryToolbar";
 
 type TabId =
   | "all"
@@ -52,10 +53,23 @@ const TABS: TabDefinition[] = [
   },
 ];
 
+const NOVEL_TABS: TabId[] = ["all", "reading", "completed", "on-hold"];
+
+const DEFAULT_FILTERS: ToolbarFilters = {
+  search: "",
+  publicationStatus: "all",
+  chapterRange: "any",
+  sort: "recently-read",
+  tags: [],
+};
+
 export const LibraryTabs: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>("all");
+  const [toolbarFilters, setToolbarFilters] =
+    useState<ToolbarFilters>(DEFAULT_FILTERS);
 
   const currentTabDef = TABS.find((t) => t.id === activeTab) || TABS[0];
+  const showToolbar = NOVEL_TABS.includes(activeTab);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -66,6 +80,7 @@ export const LibraryTabs: React.FC = () => {
         return (
           <NovelCardGrid
             filterStatus={activeTab === "all" ? undefined : activeTab}
+            toolbarFilters={toolbarFilters}
           />
         );
       case "collections":
@@ -119,6 +134,20 @@ export const LibraryTabs: React.FC = () => {
 
       {/* Content Area */}
       <div className="flex-1 px-8 md:px-12 lg:px-20 max-w-[1200px] w-full mx-auto pb-20">
+        {/* Toolbar — only shown on novel tabs */}
+        {showToolbar && (
+          <Suspense
+            fallback={
+              <div className="mb-8 h-[88px] rounded-xl bg-slate-50 animate-pulse" />
+            }
+          >
+            <LibraryToolbar
+              filters={toolbarFilters}
+              onFiltersChange={setToolbarFilters}
+            />
+          </Suspense>
+        )}
+
         <div className="w-full min-h-[300px]">
           <Suspense
             fallback={
