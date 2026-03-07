@@ -142,8 +142,13 @@ export class Shuba69Crawler extends BaseCrawler {
 
   async *crawlAndStream(
     novelId: string,
+    targetIndexes?: number[],
   ): AsyncGenerator<ChapterData, void, unknown> {
-    const chapters = await this.getChapterList(novelId);
+    let chapters = await this.getChapterList(novelId);
+
+    if (targetIndexes && targetIndexes.length > 0) {
+      chapters = chapters.filter((ch) => targetIndexes.includes(ch.index));
+    }
 
     // Queue all tasks. PQueue will control concurrency limit automatically.
     const tasks = chapters.map((chapter) =>

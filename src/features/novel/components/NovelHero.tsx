@@ -3,20 +3,47 @@
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 
+import { useRouter } from "next/navigation";
+
 interface NovelHeroProps {
   novel: any;
+  firstChapterId?: string | null;
 }
 
-export function NovelHero({ novel }: NovelHeroProps) {
+export function NovelHero({ novel, firstChapterId }: NovelHeroProps) {
+  const router = useRouter();
   const currentChapterId =
-    novel.library_entries?.[0]?.current_chapter_id || null;
+    novel.library_entries?.[0]?.current_chapter_id || firstChapterId;
   const readNowUrl = currentChapterId
     ? `/reader/${novel.id}/${currentChapterId}`
-    : `/reader/${novel.id}/1`; // assuming chapter lookup would redirect or handle '1'
+    : null;
 
   const title = novel.title_translated || novel.title_raw;
   const author = novel.author_translated || novel.author_raw;
   const description = novel.description_translated || novel.description_raw;
+
+  const handleDelete = async () => {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${title}"? This will remove all chapters and reading progress.`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/novels/${novel.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete novel");
+
+      router.push("/library");
+      router.refresh();
+    } catch (err: any) {
+      alert("Error deleting novel: " + err.message);
+    }
+  };
 
   return (
     <div className="flex flex-col md:flex-row gap-10 mb-12">
@@ -90,14 +117,33 @@ export function NovelHero({ novel }: NovelHeroProps) {
             ))}
           </div>
           <div className="flex flex-wrap gap-3 mb-8">
-            <Link
-              href={readNowUrl}
-              className="flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors shadow-sm"
+            {readNowUrl ? (
+              <Link
+                href={readNowUrl}
+                className="flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors shadow-sm"
+              >
+                <span className="material-symbols-outlined">menu_book</span>
+                {novel.library_entries?.[0]?.current_chapter_id
+                  ? "Continue Reading"
+                  : "Read Now"}
+              </Link>
+            ) : (
+              <button
+                disabled
+                className="flex items-center gap-2 px-8 py-3 bg-slate-100 text-slate-400 rounded-xl font-bold cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined">block</span>
+                No Chapters
+              </button>
+            )}
+            <button
+              onClick={() =>
+                alert(
+                  "This feature will check for new chapters on the source site.",
+                )
+              }
+              className="flex items-center gap-2 px-4 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors shadow-sm"
             >
-              <span className="material-symbols-outlined">menu_book</span>
-              Read Now
-            </Link>
-            <button className="flex items-center gap-2 px-4 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors shadow-sm">
               <span className="material-symbols-outlined">sync</span>
               Check Status
             </button>
@@ -105,18 +151,23 @@ export function NovelHero({ novel }: NovelHeroProps) {
               <button
                 className="flex items-center justify-center size-12 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
                 title="Edit"
+                onClick={() => alert("Edit metadata manually (Coming Soon)")}
               >
                 <span className="material-symbols-outlined">edit</span>
               </button>
               <button
                 className="flex items-center justify-center size-12 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
                 title="Translate"
+                onClick={() =>
+                  alert("Translate whole novel using AI (Coming Soon)")
+                }
               >
                 <span className="material-symbols-outlined">translate</span>
               </button>
               <button
                 className="flex items-center justify-center size-12 bg-white border border-red-200 text-red-500 rounded-xl hover:bg-red-50 transition-colors shadow-sm"
                 title="Delete"
+                onClick={handleDelete}
               >
                 <span className="material-symbols-outlined">delete</span>
               </button>

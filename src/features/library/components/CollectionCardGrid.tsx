@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/navigation";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { libraryApi } from "../api/libraryApi";
 import { CollectionData } from "../types/library";
@@ -6,10 +7,14 @@ import { CollectionData } from "../types/library";
 const CollectionCard: React.FC<{ collection: CollectionData }> = ({
   collection,
 }) => {
+  const router = useRouter();
   const covers = collection.cover_previews.slice(0, 3);
 
   return (
-    <div className="relative flex flex-col p-6 rounded-2xl bg-white border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.08)] transition-all duration-300 group cursor-pointer items-center text-center">
+    <div
+      onClick={() => router.push(`/library/collection/${collection.id}`)}
+      className="relative flex flex-col p-6 rounded-2xl bg-white border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.08)] transition-all duration-300 group cursor-pointer items-center text-center"
+    >
       {/* Cover Fan Stack */}
       <div className="relative w-full h-44 flex items-end justify-center mb-6">
         {covers.length === 0 ? (
@@ -59,7 +64,13 @@ const CollectionCard: React.FC<{ collection: CollectionData }> = ({
   );
 };
 
-export const CollectionCardGrid: React.FC = () => {
+interface CollectionCardGridProps {
+  onCreateCollection?: () => void;
+}
+
+export const CollectionCardGrid: React.FC<CollectionCardGridProps> = ({
+  onCreateCollection,
+}) => {
   const { data: collections } = useSuspenseQuery({
     queryKey: ["collections"],
     queryFn: () => libraryApi.getCollections(),
@@ -78,7 +89,10 @@ export const CollectionCardGrid: React.FC = () => {
           Create your first collection to organize your novels exactly how you
           like them.
         </p>
-        <button className="px-6 py-2 rounded-full border border-slate-200 text-slate-700 font-medium text-sm hover:bg-slate-50 transition-colors">
+        <button
+          onClick={onCreateCollection}
+          className="px-6 py-2 rounded-full border border-slate-200 text-slate-700 font-medium text-sm hover:bg-slate-50 transition-colors"
+        >
           + Create Collection
         </button>
       </div>

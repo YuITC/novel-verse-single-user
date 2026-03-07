@@ -10,22 +10,41 @@ export interface StartCrawlRequest {
 }
 
 export interface StartCrawlResponse {
-  jobId: string;
+  jobId?: string;
   novelId: string;
   message: string;
+  isDuplicate?: boolean;
 }
 
 export const crawlerApi = {
-  startCrawl: async (url: string): Promise<StartCrawlResponse> => {
+  getActiveJobs: async (): Promise<any[]> => {
     const response = await fetch("/api/crawl", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
+      method: "GET",
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || "Failed to start crawl");
+      throw new Error(
+        error.error || error.message || "Failed to fetch active jobs",
+      );
+    }
+
+    return response.json();
+  },
+
+  startCrawl: async (
+    url: string,
+    force = false,
+  ): Promise<StartCrawlResponse> => {
+    const response = await fetch("/api/crawl", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url, force }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || error.message || "Failed to start crawl");
     }
 
     return response.json();
@@ -40,7 +59,7 @@ export const crawlerApi = {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || "Failed to retry job");
+      throw new Error(error.error || error.message || "Failed to retry job");
     }
 
     return response.json();
@@ -55,7 +74,7 @@ export const crawlerApi = {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || "Failed to cancel job");
+      throw new Error(error.error || error.message || "Failed to cancel job");
     }
 
     return response.json();

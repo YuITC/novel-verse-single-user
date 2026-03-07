@@ -6,8 +6,9 @@ export interface LibraryFilters {
   readingStatus?: string;
   search?: string;
   publicationStatus?: string;
-  chapterRange?: string;
-  tags?: string[];
+  chapterRange?: [number, number];
+  includeTags?: string[];
+  excludeTags?: string[];
   sort?: string;
 }
 
@@ -19,9 +20,19 @@ export const libraryApi = {
       search,
       publicationStatus,
       chapterRange,
-      tags,
+      includeTags,
+      excludeTags,
       sort = "recently-read",
     } = filters;
+
+    const hasChapterFilter =
+      chapterRange && (chapterRange[0] > 0 || chapterRange[1] < 5000);
+
+    const hasNovelFilter =
+      (search && search.trim()) ||
+      (publicationStatus && publicationStatus !== "all") ||
+      hasChapterFilter ||
+      (includeTags && includeTags.length > 0);
 
     let query = supabase.from("library_entries").select(
       `
@@ -29,7 +40,7 @@ export const libraryApi = {
         reading_status,
         current_chapter_id,
         updated_at,
-        novel:novels (
+        novel:novels${hasNovelFilter ? "!inner" : ""} (
           id,
           title:title_raw,
           author:author_raw,
@@ -60,33 +71,19 @@ export const libraryApi = {
       query = query.eq("novels.publication_status", publicationStatus);
     }
 
-    // Chapter range filter
-    if (chapterRange && chapterRange !== "any") {
-      switch (chapterRange) {
-        case "1-100":
-          query = query
-            .gte("novels.total_chapters", 1)
-            .lte("novels.total_chapters", 100);
-          break;
-        case "101-500":
-          query = query
-            .gte("novels.total_chapters", 101)
-            .lte("novels.total_chapters", 500);
-          break;
-        case "501-1000":
-          query = query
-            .gte("novels.total_chapters", 501)
-            .lte("novels.total_chapters", 1000);
-          break;
-        case "1000+":
-          query = query.gte("novels.total_chapters", 1000);
-          break;
+    // Chapter range filter (slider-based)
+    if (hasChapterFilter && chapterRange) {
+      if (chapterRange[0] > 0) {
+        query = query.gte("novels.total_chapters", chapterRange[0]);
+      }
+      if (chapterRange[1] < 5000) {
+        query = query.lte("novels.total_chapters", chapterRange[1]);
       }
     }
 
-    // Genre tags filter (AND logic — novel must contain ALL selected tags)
-    if (tags && tags.length > 0) {
-      query = query.contains("novels.genres", tags);
+    // Genre tags filter — include (AND logic — novel must contain ALL selected tags)
+    if (includeTags && includeTags.length > 0) {
+      query = query.contains("novels.genres", includeTags);
     }
 
     // Sort order
@@ -118,9 +115,18 @@ export const libraryApi = {
       throw error;
     }
 
-    return (data as any[])
-      .filter((item) => item.novel !== null)
-      .map((item) => ({
+    let results = (data as any[])
+      .filter((item) => item.novel !== null);
+
+    // Exclude tags filter (client-side — novel must NOT contain ANY excluded tag)
+    if (excludeTags && excludeTags.length > 0) {
+      results = results.filter((item) => {
+        const genres: string[] = item.novel.genres || [];
+        return !excludeTags.some((tag) => genres.includes(tag));
+      });
+    }
+
+    return results.map((item) => ({
         id: item.id,
         reading_status: item.reading_status as any,
         current_chapter_id: item.current_chapter_id,
@@ -220,6 +226,7 @@ export const libraryApi = {
 
     const map = new Map<string, BookmarkGroup>();
     for (const b of data as any[]) {
+      if (!b.novel || !b.chapter) continue;
       const nid = b.novel.id;
       if (!map.has(nid)) {
         map.set(nid, {
@@ -243,5 +250,78 @@ export const libraryApi = {
     }
 
     return Array.from(map.values());
+  },
+
+  updateReadingStatus: async (
+    entryId: string,
+    status: string,
+  ): Promise<void> => {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("library_entries")
+      .update({ reading_status: status, updated_at: new Date().toISOString() })
+      .eq("id", entryId);
+
+    if (error) {
+      console.error("Supabase updateReadingStatus error:", error);
+      throw error;
+    }
+  },
+
+  removeFromLibrary: async (entryId: string): Promise<void> => {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("library_entries")
+      .delete()
+      .eq("id", entryId);
+
+    if (error) {
+      console.error("Supabase removeFromLibrary error:", error);
+      throw error;
+    }
+  },
+
+  createCollection: async (title: string): Promise<string> => {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("collections")
+      .insert({ title })
+      .select("id")
+      .single();
+
+    if (error) {
+      console.error("Supabase createCollection error:", error);
+      throw error;
+    }
+    return data.id;
+  },
+
+  addNovelToCollection: async (
+    collectionId: string,
+    novelId: string,
+  ): Promise<void> => {
+    const supabase = createClient();
+    const { error } = await supabase.from("collection_novels").insert({
+      collection_id: collectionId,
+      novel_id: novelId,
+    });
+
+    if (error) {
+      console.error("Supabase addNovelToCollection error:", error);
+      throw error;
+    }
+  },
+
+  removeBookmark: async (bookmarkId: string): Promise<void> => {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("bookmarks")
+      .delete()
+      .eq("id", bookmarkId);
+
+    if (error) {
+      console.error("Supabase removeBookmark error:", error);
+      throw error;
+    }
   },
 };

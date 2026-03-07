@@ -21,7 +21,7 @@ export default async function NovelDetailsPage({
         current_chapter_id,
         reading_status
       )
-    `
+    `,
     )
     .eq("id", id)
     .single();
@@ -29,6 +29,15 @@ export default async function NovelDetailsPage({
   if (error || !novel) {
     return notFound();
   }
+
+  // Fetch the first chapter ID for "Read Now" logic
+  const { data: firstChapter } = await supabase
+    .from("chapters")
+    .select("id")
+    .eq("novel_id", id)
+    .order("chapter_index", { ascending: true })
+    .limit(1)
+    .single();
 
   // Fetch the first page of chapters
   const { data: chapters } = await supabase
@@ -40,8 +49,8 @@ export default async function NovelDetailsPage({
 
   return (
     <main className="flex-1 pb-16">
-      <div className="layout-content-container flex flex-col max-w-[1200px] flex-1 w-full mx-auto px-8 md:px-12 lg:px-20 mt-5">
-        <NovelHero novel={novel} />
+      <div className="layout-content-container flex flex-col max-w-[1300px] flex-1 w-full mx-auto px-4 md:px-6 lg:px-8 mt-5">
+        <NovelHero novel={novel} firstChapterId={firstChapter?.id || null} />
         <ChapterList novelId={id} initialChapters={chapters || []} />
       </div>
     </main>

@@ -1,6 +1,29 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+export async function GET(
+  req: Request,
+  props: { params: Promise<{ id: string }> },
+) {
+  const params = await props.params;
+  const id = params.id;
+  const supabase = await createClient();
+
+  const { data: chapter, error } = await supabase
+    .from("chapters")
+    .select("title_raw, content_raw, chapter_index")
+    .eq("id", id)
+    .single();
+
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({
+    title: chapter.title_raw,
+    content: chapter.content_raw,
+    chapter_index: chapter.chapter_index,
+  });
+}
+
 export async function PATCH(
   req: Request,
   props: { params: Promise<{ id: string }> },

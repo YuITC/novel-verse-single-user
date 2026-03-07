@@ -7,10 +7,20 @@ interface Props {
     chapter_index?: number;
   };
   onChange: (data: Partial<Props["data"]>) => void;
+  onChapterSelect?: (id: string) => void;
+  chapters?: { id: string; title: string; chapter_index: number }[];
+  currentChapterId?: string;
   disabled?: boolean;
 }
 
-export function ChapterEditorCard({ data, onChange, disabled }: Props) {
+export function ChapterEditorCard({
+  data,
+  onChange,
+  onChapterSelect,
+  chapters,
+  currentChapterId,
+  disabled,
+}: Props) {
   const words = data.content.trim()
     ? data.content.trim().split(/\s+/).length
     : 0;
@@ -20,9 +30,28 @@ export function ChapterEditorCard({ data, onChange, disabled }: Props) {
     <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm flex flex-col overflow-hidden">
       {/* Editor Info Header */}
       <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
-        <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
-          Chapter Content
-        </h2>
+        <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+          <h2 className="text-lg font-bold text-slate-900 ">Chapter Content</h2>
+          {chapters && chapters.length > 0 && (
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                Select Chapter:
+              </label>
+              <select
+                value={currentChapterId || ""}
+                onChange={(e) => onChapterSelect?.(e.target.value)}
+                className="text-xs font-bold bg-slate-50 border border-slate-200 rounded-md px-2 py-1 outline-none focus:border-primary transition-all"
+              >
+                <option value="">New Chapter</option>
+                {chapters.map((ch) => (
+                  <option key={ch.id} value={ch.id}>
+                    Ch {ch.chapter_index}: {ch.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="w-full sm:w-24">
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">

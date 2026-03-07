@@ -48,6 +48,20 @@ export const uploaderApi = {
     if (!response.ok) throw new Error(await response.text());
   },
 
+  getChapters: async (
+    novelId: string,
+  ): Promise<{ id: string; title: string; chapter_index: number }[]> => {
+    const response = await fetch(`/api/novels/${novelId}/chapters`);
+    if (!response.ok) throw new Error(await response.text());
+    return response.json();
+  },
+
+  getChapter: async (id: string): Promise<ChapterFormData> => {
+    const response = await fetch(`/api/chapters/${id}`);
+    if (!response.ok) throw new Error(await response.text());
+    return response.json();
+  },
+
   uploadCover: async (file: File): Promise<UploadCoverResponse> => {
     const formData = new FormData();
     formData.append("file", file);

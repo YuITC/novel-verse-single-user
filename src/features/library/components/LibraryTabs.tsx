@@ -1,16 +1,27 @@
 "use client";
 
 import React, { useState, Suspense } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { NovelCardGrid } from "./NovelCardGrid";
 import { CollectionCardGrid } from "./CollectionCardGrid";
 import { BookmarkList } from "./BookmarkList";
 import { LibraryToolbar, ToolbarFilters } from "./LibraryToolbar";
+import { libraryApi } from "../api/libraryApi";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 type TabId =
   | "all"
   | "reading"
   | "completed"
-  | "on-hold"
+  | "dropped"
+  | "read-later"
   | "collections"
   | "bookmarks";
 
@@ -24,27 +35,32 @@ const TABS: TabDefinition[] = [
   {
     id: "all",
     label: "All",
-    subtitle: "Continue reading your favorite web novels",
+    subtitle: "Explore and manage your entire novel library",
   },
   {
     id: "reading",
     label: "Reading",
-    subtitle: "Continue reading your favorite web novels",
+    subtitle: "Quickly pick up where you left off",
   },
   {
     id: "completed",
     label: "Completed",
-    subtitle: "Continue reading your favorite web novels",
+    subtitle: "Novels you've finished reading",
   },
   {
-    id: "on-hold",
-    label: "On Hold",
-    subtitle: "Continue reading your favorite web novels",
+    id: "dropped",
+    label: "Dropped",
+    subtitle: "Novels you've stopped reading",
+  },
+  {
+    id: "read-later",
+    label: "Read Later",
+    subtitle: "Novels you've saved for later",
   },
   {
     id: "collections",
     label: "My Collections",
-    subtitle: "Continue reading your favorite web novels",
+    subtitle: "Organize your library into custom groups",
   },
   {
     id: "bookmarks",
@@ -53,20 +69,51 @@ const TABS: TabDefinition[] = [
   },
 ];
 
-const NOVEL_TABS: TabId[] = ["all", "reading", "completed", "on-hold"];
+const NOVEL_TABS: TabId[] = [
+  "all",
+  "reading",
+  "completed",
+  "dropped",
+  "read-later",
+];
 
 const DEFAULT_FILTERS: ToolbarFilters = {
   search: "",
   publicationStatus: "all",
-  chapterRange: "any",
+  chapterRange: [0, 5000],
   sort: "recently-read",
-  tags: [],
+  includeTags: [],
+  excludeTags: [],
 };
 
 export const LibraryTabs: React.FC = () => {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabId>("all");
   const [toolbarFilters, setToolbarFilters] =
     useState<ToolbarFilters>(DEFAULT_FILTERS);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newCollectionTitle, setNewCollectionTitle] = useState("");
+
+  const createCollectionMutation = useMutation({
+    mutationFn: (title: string) => libraryApi.createCollection(title),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["collections"] });
+      setActiveTab("collections");
+      setIsCreateModalOpen(false);
+      setNewCollectionTitle("");
+    },
+  });
+
+  const handleCreateCollection = () => {
+    setNewCollectionTitle("");
+    setIsCreateModalOpen(true);
+  };
+
+  const handleSubmitCollection = () => {
+    if (newCollectionTitle.trim()) {
+      createCollectionMutation.mutate(newCollectionTitle.trim());
+    }
+  };
 
   const currentTabDef = TABS.find((t) => t.id === activeTab) || TABS[0];
   const showToolbar = NOVEL_TABS.includes(activeTab);
@@ -76,7 +123,8 @@ export const LibraryTabs: React.FC = () => {
       case "all":
       case "reading":
       case "completed":
-      case "on-hold":
+      case "dropped":
+      case "read-later":
         return (
           <NovelCardGrid
             filterStatus={activeTab === "all" ? undefined : activeTab}
@@ -84,7 +132,9 @@ export const LibraryTabs: React.FC = () => {
           />
         );
       case "collections":
-        return <CollectionCardGrid />;
+        return (
+          <CollectionCardGrid onCreateCollection={handleCreateCollection} />
+        );
       case "bookmarks":
         return <BookmarkList />;
       default:
@@ -95,7 +145,7 @@ export const LibraryTabs: React.FC = () => {
   return (
     <div className="w-full flex-1 flex flex-col">
       {/* Page Header */}
-      <div className="mb-8 md:mb-10 px-8 md:px-12 lg:px-20 max-w-[1200px] w-full mx-auto mt-8">
+      <div className="mb-8 md:mb-10 px-4 md:px-6 lg:px-8 max-w-[1300px] w-full mx-auto mt-8">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-2">
           My Library
         </h1>
@@ -125,15 +175,23 @@ export const LibraryTabs: React.FC = () => {
             })}
           </div>
 
-          <button className="hidden sm:flex shrink-0 mb-3 ml-4 items-center justify-center gap-1 h-9 px-4 rounded-full border border-slate-200 bg-slate-100 text-slate-600 text-sm font-medium hover:bg-slate-200 transition-colors">
-            <span className="material-symbols-outlined text-lg">add</span>
-            Create Collections
+          <button
+            onClick={handleCreateCollection}
+            disabled={createCollectionMutation.isPending}
+            className="hidden sm:flex shrink-0 mb-3 ml-4 items-center justify-center gap-1 h-9 px-4 rounded-full border border-slate-200 bg-slate-100 text-slate-600 text-sm font-medium hover:bg-slate-200 transition-colors disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-lg">
+              {createCollectionMutation.isPending ? "progress_activity" : "add"}
+            </span>
+            {createCollectionMutation.isPending
+              ? "Creating..."
+              : "Create Collection"}
           </button>
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 px-8 md:px-12 lg:px-20 max-w-[1200px] w-full mx-auto pb-20">
+      <div className="flex-1 px-4 md:px-6 lg:px-8 max-w-[1300px] w-full mx-auto pb-20">
         {/* Toolbar — only shown on novel tabs */}
         {showToolbar && (
           <Suspense
@@ -163,6 +221,48 @@ export const LibraryTabs: React.FC = () => {
           </Suspense>
         </div>
       </div>
+
+      {/* Create Collection Modal */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Collection</DialogTitle>
+            <DialogDescription>
+              Give your new collection a name to get started.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <input
+              type="text"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-slate-400"
+              placeholder="Collection name"
+              value={newCollectionTitle}
+              onChange={(e) => setNewCollectionTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSubmitCollection();
+              }}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setIsCreateModalOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmitCollection}
+              disabled={
+                !newCollectionTitle.trim() || createCollectionMutation.isPending
+              }
+              className="px-6 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {createCollectionMutation.isPending ? "Creating..." : "Create"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,6 +1,31 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+export async function GET(
+  req: Request,
+  props: { params: Promise<{ id: string }> },
+) {
+  const params = await props.params;
+  const novelId = params.id;
+  const supabase = await createClient();
+
+  const { data: chapters, error } = await supabase
+    .from("chapters")
+    .select("id, title_raw, chapter_index")
+    .eq("novel_id", novelId)
+    .order("chapter_index", { ascending: true });
+
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(
+    chapters.map((ch) => ({
+      id: ch.id,
+      title: ch.title_raw,
+      chapter_index: ch.chapter_index,
+    })),
+  );
+}
+
 export async function POST(
   req: Request,
   props: { params: Promise<{ id: string }> },

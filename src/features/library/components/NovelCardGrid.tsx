@@ -3,6 +3,7 @@ import { NovelCard } from "./NovelCard";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { libraryApi } from "../api/libraryApi";
 import { ToolbarFilters } from "./LibraryToolbar";
+import Link from "next/link";
 
 interface NovelCardGridProps {
   filterStatus?: string;
@@ -19,9 +20,10 @@ export const NovelCardGrid: React.FC<NovelCardGridProps> = ({
       filterStatus || "all",
       toolbarFilters?.search || "",
       toolbarFilters?.publicationStatus || "all",
-      toolbarFilters?.chapterRange || "any",
+      toolbarFilters?.chapterRange?.join("-") || "0-5000",
       toolbarFilters?.sort || "recently-read",
-      toolbarFilters?.tags?.join(",") || "",
+      toolbarFilters?.includeTags?.join(",") || "",
+      toolbarFilters?.excludeTags?.join(",") || "",
     ],
     queryFn: () =>
       libraryApi.getLibrary({
@@ -29,7 +31,8 @@ export const NovelCardGrid: React.FC<NovelCardGridProps> = ({
         search: toolbarFilters?.search,
         publicationStatus: toolbarFilters?.publicationStatus,
         chapterRange: toolbarFilters?.chapterRange,
-        tags: toolbarFilters?.tags,
+        includeTags: toolbarFilters?.includeTags,
+        excludeTags: toolbarFilters?.excludeTags,
         sort: toolbarFilters?.sort,
       }),
   });
@@ -45,14 +48,37 @@ export const NovelCardGrid: React.FC<NovelCardGridProps> = ({
         </h3>
         <p className="text-sm text-slate-500 mb-6 max-w-sm">
           {toolbarFilters?.search ||
-          toolbarFilters?.tags?.length ||
+          toolbarFilters?.includeTags?.length ||
+          toolbarFilters?.excludeTags?.length ||
           (toolbarFilters?.publicationStatus &&
             toolbarFilters.publicationStatus !== "all") ||
           (toolbarFilters?.chapterRange &&
-            toolbarFilters.chapterRange !== "any")
+            (toolbarFilters.chapterRange[0] > 0 || toolbarFilters.chapterRange[1] < 5000))
             ? "No novels match your current filters. Try adjusting your search or filter criteria."
             : "Import novels via the Crawler or Uploader to get started."}
         </p>
+        {!toolbarFilters?.search && (
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/crawler"
+              className="flex items-center gap-2 h-10 px-6 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/95 transition-colors shadow-sm"
+            >
+              <span className="material-symbols-outlined text-lg">
+                travel_explore
+              </span>
+              Crawl Novels
+            </Link>
+            <Link
+              href="/uploader"
+              className="flex items-center gap-2 h-10 px-6 rounded-full border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">
+                upload_file
+              </span>
+              Upload Manually
+            </Link>
+          </div>
+        )}
       </div>
     );
   }

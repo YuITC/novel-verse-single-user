@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { libraryApi } from "../api/libraryApi";
 import { BookmarkGroup } from "../types/library";
 
@@ -23,6 +23,14 @@ function formatDate(dateString: string) {
 
 export const BookmarkList: React.FC = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const removeBookmarkMutation = useMutation({
+    mutationFn: (bookmarkId: string) => libraryApi.removeBookmark(bookmarkId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+    },
+  });
 
   const { data: bookmarkGroups } = useSuspenseQuery({
     queryKey: ["bookmarks"],
@@ -104,14 +112,16 @@ export const BookmarkList: React.FC = () => {
                     {formatDate(bookmark.created_at)}
                   </span>
                   <button
-                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 focus:outline-none focus:opacity-100 p-1 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 focus:outline-none focus:opacity-100 p-1 rounded hover:bg-red-50 text-slate-400 hover:text-red-500"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // menu open logic
+                      removeBookmarkMutation.mutate(bookmark.id);
                     }}
+                    disabled={removeBookmarkMutation.isPending}
+                    title="Remove bookmark"
                   >
                     <span className="material-symbols-outlined text-lg">
-                      more_horiz
+                      delete
                     </span>
                   </button>
                 </div>

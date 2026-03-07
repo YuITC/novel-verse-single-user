@@ -16,6 +16,8 @@ interface ReaderTopbarProps {
   };
   isBookmarked: boolean;
   onBookmarkToggle: () => void;
+  isTtsPlaying: boolean;
+  onTtsToggle: () => void;
 }
 
 export function ReaderTopbar({
@@ -23,6 +25,8 @@ export function ReaderTopbar({
   chapter,
   isBookmarked,
   onBookmarkToggle,
+  isTtsPlaying,
+  onTtsToggle,
 }: ReaderTopbarProps) {
   return (
     <header className="flex-none flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur border-b border-white/10 z-10 shadow-sm text-slate-800">
@@ -66,10 +70,13 @@ export function ReaderTopbar({
           </span>
         </button>
         <button
-          className="p-2.5 rounded-full hover:bg-black/5 transition-colors"
-          title="Text-to-Speech"
+          onClick={onTtsToggle}
+          className={`p-2.5 rounded-full transition-colors ${isTtsPlaying ? "bg-primary text-white hover:bg-primary/90" : "hover:bg-black/5"}`}
+          title={isTtsPlaying ? "Stop TTS" : "Text-to-Speech"}
         >
-          <span className="material-symbols-outlined">volume_up</span>
+          <span className="material-symbols-outlined">
+            {isTtsPlaying ? "stop" : "volume_up"}
+          </span>
         </button>
       </div>
     </header>

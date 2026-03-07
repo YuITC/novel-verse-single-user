@@ -99,11 +99,29 @@ export class UukanshuCrawler extends BaseCrawler {
   async getChapterContent(chapterUrl: string): Promise<string> {
     const html = await this.fetchHtml(chapterUrl, { delayMs: 2000 });
 
-    const cleanContent = TextCleaner.extractAndClean(html, ".readcotent");
+    // Try multiple common selectors
+    const selectors = [
+      ".readcotent",
+      ".readcontent",
+      "#content",
+      ".content-body",
+      "#chaptercontent",
+    ];
+    let cleanContent = "";
+
+    for (const selector of selectors) {
+      cleanContent = TextCleaner.extractAndClean(html, selector);
+      if (cleanContent && cleanContent.length > 50) break;
+    }
 
     if (!cleanContent || cleanContent.length < 30) {
+      // Last resort: try to find the largest text block if all selectors fail
+      // but only if we didn't get blocked
+      if (html.includes("cloudflare") || html.includes("just a moment")) {
+        throw new Error("Cloudflare challenge blocked content extraction.");
+      }
       throw new Error(
-        `Empty content returned at ${chapterUrl}. Extracted length: ${cleanContent.length}`,
+        `Failed to extract content from ${chapterUrl}. Extracted length: ${cleanContent?.length || 0}`,
       );
     }
 
@@ -112,8 +130,13 @@ export class UukanshuCrawler extends BaseCrawler {
 
   async *crawlAndStream(
     novelId: string,
+    targetIndexes?: number[],
   ): AsyncGenerator<ChapterData, void, unknown> {
-    const chapters = await this.getChapterList(novelId);
+    let chapters = await this.getChapterList(novelId);
+
+    if (targetIndexes && targetIndexes.length > 0) {
+      chapters = chapters.filter((ch) => targetIndexes.includes(ch.index));
+    }
 
     // Queue all tasks. PQueue will control concurrency limit automatically.
     const tasks = chapters.map((chapter) =>

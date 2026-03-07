@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { crawlerApi } from "../api/crawlerApi";
 import {
   CrawlPhase,
@@ -13,6 +14,9 @@ import { NovelMetadataSidebar } from "./NovelMetadataSidebar";
 import { CrawledChaptersList } from "./CrawledChaptersList";
 
 export function CrawlerPage() {
+  const searchParams = useSearchParams();
+  const novelIdParam = searchParams.get("novel");
+
   const [url, setUrl] = useState("");
   const [phase, setPhase] = useState<CrawlPhase>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +26,7 @@ export function CrawlerPage() {
   const [chapters, setChapters] = useState<CrawledChapter[]>([]);
   const [progress, setProgress] = useState({ success: 0, failed: 0, total: 0 });
   const [jobId, setJobId] = useState<string | null>(null);
+  const [showDuplicatePrompt, setShowDuplicatePrompt] = useState(false);
 
   const eventSourceRef = useRef<EventSource | null>(null);
 
@@ -42,7 +47,19 @@ export function CrawlerPage() {
     }
   };
 
-  const handleStartCrawl = async () => {
+  useEffect(() => {
+    if (novelIdParam) {
+      setJobId(null);
+      setPhase("idle");
+    }
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, [novelIdParam]);
+
+  const handleStartCrawl = async (force = false) => {
     const valError = validateUrl(url);
     if (valError) {
       setError(valError);
@@ -50,6 +67,7 @@ export function CrawlerPage() {
     }
 
     setError(null);
+    setShowDuplicatePrompt(false);
     setPhase("validating");
     setLogs([]);
     setMetadata(null);
@@ -57,9 +75,18 @@ export function CrawlerPage() {
     setProgress({ success: 0, failed: 0, total: 0 });
 
     try {
-      const res = await crawlerApi.startCrawl(url);
-      setJobId(res.jobId);
-      connectStream(res.jobId);
+      const res = await crawlerApi.startCrawl(url, force);
+
+      if (res.isDuplicate) {
+        setPhase("idle");
+        setShowDuplicatePrompt(true);
+        return;
+      }
+
+      if (res.jobId) {
+        setJobId(res.jobId);
+        connectStream(res.jobId);
+      }
     } catch (err: any) {
       setError(
         err.message || "Failed to start crawl. Check that the URL is valid.",
@@ -81,6 +108,19 @@ export function CrawlerPage() {
     }
   };
 
+  const handleRetryCrawl = async () => {
+    if (!jobId) return;
+    setError(null);
+    setPhase("validating");
+    try {
+      await crawlerApi.retryJob(jobId);
+      connectStream(jobId);
+    } catch (err: any) {
+      setError(err.message || "Failed to retry job.");
+      setPhase("failed");
+    }
+  };
+
   const connectStream = (jobId: string) => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
@@ -94,16 +134,23 @@ export function CrawlerPage() {
     );
     es.addEventListener("log", (e) => {
       const log = JSON.parse((e as MessageEvent).data);
-      setLogs((prev) => [
-        ...prev,
-        { id: crypto.randomUUID(), timestamp: new Date(), ...log },
-      ]);
+      const logEntry: CrawlLogEntry = {
+        id: log.id || crypto.randomUUID(),
+        timestamp: log.timestamp ? new Date(log.timestamp) : new Date(),
+        level: log.level,
+        message: log.message,
+      };
+      setLogs((prev) => {
+        if (prev.some((l) => l.id === logEntry.id)) return prev;
+        return [...prev, logEntry];
+      });
     });
     es.addEventListener("metadata", (e) =>
       setMetadata(JSON.parse((e as MessageEvent).data)),
     );
     es.addEventListener("chapter", (e) => {
-      const ch = JSON.parse((e as MessageEvent).data);
+      const chBase = JSON.parse((e as MessageEvent).data);
+      const ch = { ...chBase, timestamp: new Date() };
       setChapters((prev) => {
         const existingIdx = prev.findIndex((p) => p.index === ch.index);
         if (existingIdx >= 0) {
@@ -130,17 +177,73 @@ export function CrawlerPage() {
   };
 
   useEffect(() => {
+    async function fetchActiveJob() {
+      try {
+        const jobs = await crawlerApi.getActiveJobs();
+        if (jobs && jobs.length > 0) {
+          const job = jobs[0]; // Take the most recent active job
+          setJobId(job.id);
+          setUrl(job.source_url);
+          setPhase(job.status);
+          setProgress({
+            success: job.successful_chapters || 0,
+            failed: job.failed_chapters || 0,
+            total: job.total_chapters || 0,
+          });
+
+          if (job.novels) {
+            setMetadata({
+              title: job.novels.title_raw,
+              author: job.novels.author_raw,
+              coverUrl: job.novels.cover_url,
+              sourceUrl: job.source_url,
+              description: job.novels.description_raw || "",
+              totalChapters: job.novels.total_chapters || 0,
+            });
+          }
+
+          if (job.memory_history) {
+            const h = job.memory_history;
+            if (h.logs) {
+              setLogs(
+                h.logs.map((l: any) => ({
+                  ...l,
+                  timestamp: new Date(l.timestamp),
+                })),
+              );
+            }
+            if (h.chapters) {
+              setChapters(
+                h.chapters.map((c: any) => ({
+                  ...c,
+                  timestamp: c.timestamp ? new Date(c.timestamp) : undefined,
+                })),
+              );
+            }
+          }
+
+          connectStream(job.id);
+        }
+      } catch (err) {
+        console.error("Failed to check for active jobs", err);
+      }
+    }
+
+    if (!novelIdParam) {
+      fetchActiveJob();
+    }
+
     return () => {
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
       }
     };
-  }, []);
+  }, [novelIdParam]);
 
   const isRunning = ["validating", "fetching_meta", "crawling"].includes(phase);
 
   return (
-    <div className="w-full max-w-[1200px] px-4 md:px-8 py-8 mx-auto flex flex-col gap-8 animate-in fade-in duration-500">
+    <div className="w-full max-w-[1300px] px-4 md:px-6 lg:px-8 py-8 mx-auto flex flex-col gap-8 animate-in fade-in duration-500">
       {/* Header & Input Section */}
       <section className="flex flex-col gap-6">
         <div>
@@ -189,7 +292,7 @@ export function CrawlerPage() {
               </button>
             ) : (
               <button
-                onClick={handleStartCrawl}
+                onClick={() => handleStartCrawl()}
                 className="h-[52px] px-8 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold transition-all shadow-sm shadow-primary/20 flex items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span className="material-symbols-outlined text-[22px]">
@@ -205,6 +308,39 @@ export function CrawlerPage() {
               <span className="text-sm font-semibold">{error}</span>
             </div>
           )}
+
+          {showDuplicatePrompt && (
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in zoom-in-95 duration-300">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-amber-500 text-[28px]">
+                  info_i
+                </span>
+                <div className="text-sm">
+                  <p className="font-bold text-amber-900">
+                    Already in library!
+                  </p>
+                  <p className="text-amber-700 font-medium">
+                    This novel exists in your library. Do you want to update it
+                    with new chapters?
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => setShowDuplicatePrompt(false)}
+                  className="flex-1 sm:flex-none px-4 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleStartCrawl(true)}
+                  className="flex-1 sm:flex-none px-6 py-2 text-xs font-bold text-white bg-amber-500 rounded-lg hover:bg-amber-600 shadow-sm shadow-amber-200 transition-all"
+                >
+                  Yes, Update Now
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -217,7 +353,12 @@ export function CrawlerPage() {
 
         {/* Right Column (Status & Chapters) */}
         <div className="lg:col-span-2 flex flex-col gap-8">
-          <CrawlStatusPanel phase={phase} logs={logs} progress={progress} />
+          <CrawlStatusPanel
+            phase={phase}
+            logs={logs}
+            progress={progress}
+            onRetry={handleRetryCrawl}
+          />
           {(chapters.length > 0 ||
             phase === "completed" ||
             phase === "crawling") && (

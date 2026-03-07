@@ -26,6 +26,11 @@ export function UploaderPage() {
     description: "",
   });
 
+  const [chapters, setChapters] = useState<
+    { id: string; title: string; chapter_index: number }[]
+  >([]);
+  const [currentChapterId, setCurrentChapterId] = useState<string | null>(null);
+
   const [chapterData, setChapterData] = useState<ChapterFormData>({
     title: "",
     content: "",
@@ -38,18 +43,43 @@ export function UploaderPage() {
 
   useEffect(() => {
     if (novelIdParam) {
-      uploaderApi
-        .getNovel(novelIdParam)
-        .then((data) => {
-          setNovelData(data);
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          setToast({ message: "Failed to load novel", type: "error" });
-          setIsLoading(false);
-        });
+      loadNovel(novelIdParam);
     }
   }, [novelIdParam]);
+
+  const loadNovel = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const data = await uploaderApi.getNovel(id);
+      setNovelData(data);
+      const chapterList = await uploaderApi.getChapters(id);
+      setChapters(chapterList);
+      setIsLoading(false);
+    } catch (err) {
+      showToast("Failed to load novel.", "error");
+      setIsLoading(false);
+    }
+  };
+
+  const handleChapterSelect = async (id: string | null) => {
+    if (!id) {
+      setCurrentChapterId(null);
+      setChapterData({
+        title: "",
+        content: "",
+        chapter_index: chapters.length + 1,
+      });
+      return;
+    }
+
+    try {
+      const data = await uploaderApi.getChapter(id);
+      setCurrentChapterId(id);
+      setChapterData(data);
+    } catch (err) {
+      showToast("Failed to load chapter content.", "error");
+    }
+  };
 
   const showToast = (message: string, type: "success" | "error") => {
     setToast({ message, type });
@@ -58,7 +88,6 @@ export function UploaderPage() {
 
   const validate = () => {
     if (!novelData.title.trim()) return "Story Title is required";
-    if (!novelData.author.trim()) return "Author is required";
     if (!chapterData.title.trim()) return "Chapter Title is required";
     if (!chapterData.content.trim()) return "Chapter Content is required";
     return null;
@@ -90,8 +119,20 @@ export function UploaderPage() {
         await uploaderApi.updateNovel(currentNovelId, novelData);
       }
 
-      // 2. Create Chapter
-      await uploaderApi.createChapter(currentNovelId, chapterData);
+      // 2. Create or Update Chapter
+      if (currentChapterId) {
+        await uploaderApi.updateChapter(currentChapterId, chapterData);
+      } else {
+        const res = await uploaderApi.createChapter(
+          currentNovelId,
+          chapterData,
+        );
+        setCurrentChapterId(res.id);
+      }
+
+      // Refresh chapter list
+      const chapterList = await uploaderApi.getChapters(currentNovelId);
+      setChapters(chapterList);
 
       showToast(
         isPublishingAction
@@ -100,12 +141,13 @@ export function UploaderPage() {
         "success",
       );
 
-      // Clear chapter data after publish/save (optional, assuming they want to write next chapter)
-      if (isPublishingAction) {
+      // If published a new chapter, prepare for the next one
+      if (isPublishingAction && !currentChapterId) {
+        setCurrentChapterId(null);
         setChapterData({
           title: "",
           content: "",
-          chapter_index: (chapterData.chapter_index || 0) + 1,
+          chapter_index: (chapterData.chapter_index || chapters.length) + 1,
         });
       }
     } catch (err: any) {
@@ -122,7 +164,7 @@ export function UploaderPage() {
   }
 
   return (
-    <div className="w-full max-w-[800px] px-4 py-8 mx-auto flex flex-col gap-8 pb-32 animate-in fade-in duration-500">
+    <div className="w-full max-w-[1300px] px-4 md:px-6 lg:px-8 py-8 mx-auto flex flex-col gap-8 pb-32 animate-in fade-in duration-500">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
@@ -145,6 +187,9 @@ export function UploaderPage() {
 
       <ChapterEditorCard
         data={chapterData}
+        chapters={chapters}
+        currentChapterId={currentChapterId || undefined}
+        onChapterSelect={(id) => handleChapterSelect(id || null)}
         onChange={(updates) =>
           setChapterData((prev) => ({ ...prev, ...updates }))
         }

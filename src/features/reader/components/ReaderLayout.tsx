@@ -4,6 +4,7 @@ import { useState, useEffect, ReactNode } from "react";
 import { ReaderTopbar } from "./ReaderTopbar";
 import { LeftSidebar } from "./LeftSidebar";
 import { RightSidebar } from "./RightSidebar";
+import { createClient } from "@/lib/supabase/client";
 
 interface ReaderLayoutProps {
   novel: any;
@@ -46,10 +47,13 @@ export function ReaderLayout({
   allChapters,
   initialBookmarks,
 }: ReaderLayoutProps) {
-  const [preferences, setPreferences] = useState<ReadingPreferences>(DEFAULT_PREFERENCES);
+  const supabase = createClient();
+  const [preferences, setPreferences] =
+    useState<ReadingPreferences>(DEFAULT_PREFERENCES);
   const [isBookmarked, setIsBookmarked] = useState(
-    initialBookmarks.some((b) => b.chapter_id === chapter.id)
+    initialBookmarks.some((b) => b.chapter_id === chapter.id),
   );
+  const [isTtsPlaying, setIsTtsPlaying] = useState(false);
 
   // Load from local storage initially
   useEffect(() => {
@@ -68,15 +72,78 @@ export function ReaderLayout({
 
   const updatePreference = <K extends keyof ReadingPreferences>(
     key: K,
-    value: ReadingPreferences[K]
+    value: ReadingPreferences[K],
   ) => {
     setPreferences((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleBookmarkToggle = () => {
-    // In a real app we'd call Supabase here. For now just optimistic toggle
-    setIsBookmarked(!isBookmarked);
+  const handleBookmarkToggle = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const prevState = isBookmarked;
+    setIsBookmarked(!prevState);
+
+    if (prevState) {
+      // Remove bookmark
+      await supabase
+        .from("bookmarks")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("chapter_id", chapter.id);
+    } else {
+      // Add bookmark
+      await supabase.from("bookmarks").insert({
+        user_id: user.id,
+        novel_id: novel.id,
+        chapter_id: chapter.id,
+      });
+    }
   };
+
+  const toggleTts = () => {
+    if (isTtsPlaying) {
+      window.speechSynthesis.cancel();
+      setIsTtsPlaying(false);
+      return;
+    }
+
+    const text = chapter.content_translated || chapter.content_raw || "";
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    // Simple voice matching based on prefs (could be improved)
+    const voices = window.speechSynthesis.getVoices();
+    if (preferences.tts_voice.includes("Female")) {
+      utterance.voice =
+        voices.find(
+          (v) =>
+            v.name.includes("Female") || v.name.includes("Google US English"),
+        ) || null;
+    } else {
+      utterance.voice =
+        voices.find(
+          (v) => v.name.includes("Male") || v.name.includes("Grandpa"),
+        ) || null;
+    }
+
+    utterance.rate = preferences.tts_speed;
+    utterance.pitch = preferences.tts_pitch;
+
+    utterance.onend = () => setIsTtsPlaying(false);
+    utterance.onerror = () => setIsTtsPlaying(false);
+
+    window.speechSynthesis.speak(utterance);
+    setIsTtsPlaying(true);
+  };
+
+  // Stop TTS if navigating away
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   // Map theme to background colors
   const themeClasses = {
@@ -86,15 +153,20 @@ export function ReaderLayout({
     oled: "bg-black text-slate-400",
   };
 
-  const currentThemeClass = themeClasses[preferences.theme] || themeClasses.light;
+  const currentThemeClass =
+    themeClasses[preferences.theme] || themeClasses.light;
 
   return (
-    <div className={`h-screen flex flex-col overflow-hidden ${currentThemeClass}`}>
+    <div
+      className={`h-screen flex flex-col overflow-hidden ${currentThemeClass}`}
+    >
       <ReaderTopbar
         novel={novel}
         chapter={chapter}
         isBookmarked={isBookmarked}
         onBookmarkToggle={handleBookmarkToggle}
+        isTtsPlaying={isTtsPlaying}
+        onTtsToggle={toggleTts}
       />
       <div className="flex flex-1 overflow-hidden relative">
         <LeftSidebar
@@ -122,17 +194,20 @@ export function ReaderLayout({
                 className={`prose max-w-none ${
                   preferences.theme === "dark" || preferences.theme === "oled"
                     ? "prose-invert"
-                    : "prose-slate"
+                    : ""
                 } leading-${preferences.line_height} ${
                   preferences.paragraph_spacing === "small"
                     ? "space-y-4"
                     : preferences.paragraph_spacing === "medium"
-                    ? "space-y-6"
-                    : "space-y-10"
+                      ? "space-y-6"
+                      : "space-y-10"
                 }`}
+                style={{
+                  color: preferences.theme === "sepia" ? "#5b4636" : undefined,
+                }}
               >
                 {(chapter.content_translated || chapter.content_raw)
-                  ?.split("n")
+                  ?.split(/\n+/)
                   .filter((p: string) => p.trim())
                   .map((p: string, idx: number) => (
                     <p key={idx}>{p}</p>

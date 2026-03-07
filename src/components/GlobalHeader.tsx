@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const NAV_LINKS = [
   { label: "Library", href: "/library" },
@@ -13,7 +14,14 @@ const NAV_LINKS = [
 
 export function GlobalHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const supabase = createClient();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
+  };
 
   // Consider a link active if the current pathname starts with the link's href
   // e.g. /ai/character-chat matches taking /ai
@@ -23,7 +31,7 @@ export function GlobalHeader() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-      <div className="flex h-16 items-center justify-between px-8 md:px-12 lg:px-20 max-w-[1200px] mx-auto">
+      <div className="flex h-16 items-center justify-between px-4 md:px-6 lg:px-8 max-w-[1300px] mx-auto">
         {/* Logo */}
         <Link href="/library" className="flex items-center gap-2 group">
           <span className="material-symbols-outlined text-primary text-2xl group-hover:opacity-80 transition-opacity">
@@ -99,7 +107,10 @@ export function GlobalHeader() {
                 Settings
               </button>
               <div className="my-1 h-px bg-slate-100" />
-              <button className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 w-full"
+              >
                 <span className="material-symbols-outlined text-lg opacity-70">
                   logout
                 </span>

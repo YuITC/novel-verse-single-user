@@ -76,3 +76,36 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: Request,
+  props: { params: Promise<{ id: string }> },
+) {
+  const params = await props.params;
+  const id = params.id;
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    // Delete from library_entries first (CASCADE should handle this but let's be safe or just use novels)
+    // Actually, regular DB schema with CASCADE should handle it.
+    const { error: deleteError } = await supabase
+      .from("novels")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+    if (deleteError)
+      throw new Error("Failed to delete novel: " + deleteError.message);
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

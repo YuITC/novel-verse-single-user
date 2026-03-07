@@ -43,6 +43,7 @@ next-env.d.ts
 # cache
 .cache
 
-# others
-.agent/
-.github/
+# Supabase
+supabase/.temp/
+supabase/.branches/
+supabase/snippets/

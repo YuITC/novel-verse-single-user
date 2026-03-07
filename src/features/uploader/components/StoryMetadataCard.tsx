@@ -6,7 +6,7 @@ interface Props {
     title: string;
     author: string;
     genres: string[];
-    publication_status: "ongoing" | "completed" | "hiatus";
+    publication_status: "ongoing" | "completed" | "hiatus" | "draft";
     description: string;
     cover_url?: string;
   };
@@ -116,7 +116,7 @@ export function StoryMetadataCard({ data, onChange, disabled }: Props) {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold text-slate-700">
-                Author <span className="text-rose-500">*</span>
+                Author
               </label>
               <input
                 type="text"
@@ -143,6 +143,7 @@ export function StoryMetadataCard({ data, onChange, disabled }: Props) {
                   disabled={disabled}
                   className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none bg-white font-medium text-slate-700"
                 >
+                  <option value="draft">Draft</option>
                   <option value="ongoing">Ongoing</option>
                   <option value="completed">Completed</option>
                   <option value="hiatus">Hiatus</option>

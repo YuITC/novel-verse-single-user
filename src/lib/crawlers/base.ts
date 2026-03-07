@@ -33,10 +33,17 @@ export class BaseCrawler {
   protected context: BrowserContext | null = null;
   protected maxRetries = 3;
   protected queue: PQueue;
+  protected isAborted = false;
 
   constructor(concurrency = 5) {
     this.cookieJar = new CookieJar();
     this.queue = new PQueue({ concurrency });
+  }
+
+  public abort() {
+    this.isAborted = true;
+    this.queue.clear();
+    this.closeBrowser().catch(console.error);
   }
 
   protected getRandomUserAgent() {
@@ -44,17 +51,20 @@ export class BaseCrawler {
   }
 
   protected async adaptiveDelay(minMs: number, maxMs: number) {
+    if (this.isAborted) return;
+
     // 5% chance to take a "long pause" (10-15s) to simulate reading/break
     if (Math.random() < 0.05) {
       const longPause = Math.floor(Math.random() * 5000) + 10000;
-      await new Promise((resolve) => setTimeout(resolve, longPause));
+      await this.delay(longPause);
     } else {
       const delay = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      await this.delay(delay);
     }
   }
 
   protected async delay(ms: number) {
+    if (this.isAborted) return;
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
@@ -102,6 +112,7 @@ export class BaseCrawler {
     let forcePlaywright = options?.forcePlaywright || false;
 
     while (attempt < this.maxRetries) {
+      if (this.isAborted) throw new Error("Aborted");
       try {
         if (options?.delayMs) {
           // Use adaptive delay logic: +/- 30% of the given delayMs
@@ -199,9 +210,24 @@ export class BaseCrawler {
 
     const contentType =
       (response.headers["content-type"] as string)?.toLowerCase() || "";
-    if (contentType.includes("gbk") || url.includes("69shuba")) {
+
+    // Explicit encoding based on domain and headers
+    if (
+      contentType.includes("gbk") ||
+      (url.includes("69shuba") && !url.includes("uukanshu"))
+    ) {
       return iconv.default.decode(response.body as Buffer, "gbk");
     }
+
+    if (url.includes("uukanshu.cc")) {
+      return (response.body as Buffer).toString("utf-8");
+    }
+
+    if (url.includes("uukanshu")) {
+      // Legacy uukanshu mirrors often use GBK
+      return iconv.default.decode(response.body as Buffer, "gbk");
+    }
+
     return (response.body as Buffer).toString("utf-8");
   }
 

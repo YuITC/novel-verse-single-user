@@ -25,12 +25,10 @@ export async function POST(
 
   const emitter = crawlJobs.get(jobId);
   if (emitter) {
+    emitter.cancelled = true;
     emitter.emit("phase", "cancelled");
-    emitter.emit("log", {
-      level: "error",
-      message: "Job was cancelled by user.",
-    });
-    setTimeout(() => crawlJobs.delete(jobId), 1000);
+    emitter.addLog("error", "Job was cancelled by user.");
+    setTimeout(() => crawlJobs.delete(jobId), 10000);
   }
 
   return NextResponse.json({ success: true, message: "Job cancelled" });

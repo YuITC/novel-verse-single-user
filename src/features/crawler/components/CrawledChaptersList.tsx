@@ -1,3 +1,4 @@
+import { formatDistanceToNow } from "date-fns";
 import { CrawledChapter } from "../types";
 
 export function CrawledChaptersList({
@@ -45,6 +46,11 @@ export function CrawledChaptersList({
                 >
                   {ch.title}
                 </p>
+                {ch.timestamp && (
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                    {formatDistanceToNow(ch.timestamp, { addSuffix: true })}
+                  </p>
+                )}
               </div>
 
               <div className="shrink-0 flex items-center">

@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { runBackgroundCrawl, getNovelIdFromUrl } from "@/lib/crawlers/engine";
+import {
+  runBackgroundCrawl,
+  getNovelIdFromUrl,
+  crawlJobs,
+} from "@/lib/crawlers/engine";
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -13,11 +17,60 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { data: activeJobs, error: fetchError } = await supabase
+    .from("crawl_jobs")
+    .select(
+      "*, novels(title_raw, author_raw, cover_url, description_raw, total_chapters)",
+    )
+    .eq("user_id", user.id)
+    .in("status", ["pending", "running"])
+    .order("created_at", { ascending: false });
+
+  if (fetchError) {
+    return NextResponse.json({ error: fetchError.message }, { status: 500 });
+  }
+
+  // Enrich with in-memory data if available
+  const enrichedJobs = activeJobs.map((job) => {
+    const emitter = crawlJobs.get(job.id);
+    if (emitter && (emitter as any).history) {
+      return {
+        ...job,
+        memory_history: (emitter as any).history,
+      };
+    }
+    return job;
+  });
+
+  return NextResponse.json(enrichedJobs);
+}
+
+export async function POST(req: Request) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    console.error("Auth error in crawl route:", authError);
+    return NextResponse.json(
+      {
+        error: "Unauthorized",
+        details:
+          authError?.message ||
+          "No user session found. Please login at http://127.0.0.1:54323/project/default/auth/users manually if needed.",
+      },
+      { status: 401 },
+    );
+  }
+
   try {
-    const { url } = await req.json();
+    let { url, force } = await req.json();
     if (!url) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
+    url = url.trim();
 
     let sourceNovelId: string;
     try {
@@ -39,6 +92,14 @@ export async function POST(req: Request) {
       .eq("source_url", url)
       .eq("user_id", user.id)
       .maybeSingle();
+
+    if (existingNovel && !force) {
+      return NextResponse.json({
+        isDuplicate: true,
+        novelId: existingNovel.id,
+        message: "Already in library. Update instead?",
+      });
+    }
 
     if (existingNovel) {
       novelId = existingNovel.id;

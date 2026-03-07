@@ -1,4 +1,4 @@
-export type ReadingStatus = "reading" | "completed" | "on-hold" | "read-later";
+export type ReadingStatus = "reading" | "completed" | "dropped" | "read-later";
 
 export interface NovelData {
   id: string;

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LibraryEntry } from "../types/library";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { libraryApi } from "../api/libraryApi";
 
 interface NovelCardProps {
   entry: LibraryEntry;
@@ -24,9 +26,46 @@ function timeSince(dateString: string) {
 
 export const NovelCard: React.FC<NovelCardProps> = ({ entry }) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { novel, reading_status, updated_at } = entry;
+  const [showStatusSubmenu, setShowStatusSubmenu] = useState(false);
+  const [showCollectionSubmenu, setShowCollectionSubmenu] = useState(false);
+  const { id: entryId, novel, reading_status, updated_at } = entry;
   const isCompleted = reading_status === "completed";
+
+  const { data: collections = [] } = useQuery({
+    queryKey: ["collections"],
+    queryFn: () => libraryApi.getCollections(),
+    enabled: showCollectionSubmenu,
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: (newStatus: string) =>
+      libraryApi.updateReadingStatus(entryId, newStatus),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["library"] });
+      setIsMenuOpen(false);
+      setShowStatusSubmenu(false);
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: () => libraryApi.removeFromLibrary(entryId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["library"] });
+      setIsMenuOpen(false);
+    },
+  });
+
+  const addToCollectionMutation = useMutation({
+    mutationFn: (collectionId: string) =>
+      libraryApi.addNovelToCollection(collectionId, novel.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["collections"] });
+      setIsMenuOpen(false);
+      setShowCollectionSubmenu(false);
+    },
+  });
 
   const getActionButton = () => {
     switch (reading_status) {
@@ -39,7 +78,7 @@ export const NovelCard: React.FC<NovelCardProps> = ({ entry }) => {
             </span>
           </span>
         );
-      case "on-hold":
+      case "dropped":
       case "read-later":
         return (
           <span className="text-primary font-semibold flex items-center gap-1 group-hover:opacity-70 transition-opacity">
@@ -57,6 +96,12 @@ export const NovelCard: React.FC<NovelCardProps> = ({ entry }) => {
           </span>
         );
     }
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+    setShowStatusSubmenu(false);
+    setShowCollectionSubmenu(false);
   };
 
   return (
@@ -97,7 +142,11 @@ export const NovelCard: React.FC<NovelCardProps> = ({ entry }) => {
               className="text-slate-300 hover:text-slate-600 transition-colors focus:outline-none"
               onClick={(e) => {
                 e.stopPropagation();
-                setIsMenuOpen(!isMenuOpen);
+                if (isMenuOpen) {
+                  closeMenu();
+                } else {
+                  setIsMenuOpen(true);
+                }
               }}
             >
               <span className="material-symbols-outlined text-xl">
@@ -105,17 +154,127 @@ export const NovelCard: React.FC<NovelCardProps> = ({ entry }) => {
               </span>
             </button>
             {isMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-slate-200 rounded-xl shadow-lg z-10 p-1 flex flex-col">
-                <button className="text-left px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 rounded-lg">
-                  Change Status
-                </button>
-                <button className="text-left px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 rounded-lg">
-                  Add to Collection
-                </button>
-                <div className="my-1 border-t border-slate-100"></div>
-                <button className="text-left px-3 py-2 text-sm font-medium text-destructive hover:bg-red-50 rounded-lg">
-                  Remove
-                </button>
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-20 p-1 flex flex-col scale-in-center">
+                {!showStatusSubmenu && !showCollectionSubmenu ? (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowStatusSubmenu(true);
+                      }}
+                      className="flex items-center justify-between text-left px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 rounded-lg group/item"
+                    >
+                      <span>Change Status</span>
+                      <span className="material-symbols-outlined text-lg">
+                        chevron_right
+                      </span>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowCollectionSubmenu(true);
+                      }}
+                      className="flex items-center justify-between text-left px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 rounded-lg"
+                    >
+                      <span>Add to Collection</span>
+                      <span className="material-symbols-outlined text-lg">
+                        chevron_right
+                      </span>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/novel/${novel.id}`);
+                        closeMenu();
+                      }}
+                      className="text-left px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 rounded-lg"
+                    >
+                      Edit
+                    </button>
+                    <div className="my-1 border-t border-slate-100"></div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm("Remove this novel from your library?")) {
+                          removeMutation.mutate();
+                        }
+                      }}
+                      className="flex items-center gap-2 text-left px-3 py-2 text-sm font-medium text-destructive hover:bg-red-50 rounded-lg"
+                    >
+                      <span className="material-symbols-outlined text-lg">
+                        delete
+                      </span>
+                      Remove
+                    </button>
+                  </>
+                ) : showStatusSubmenu ? (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowStatusSubmenu(false);
+                      }}
+                      className="flex items-center gap-1 text-left px-2 py-1.5 text-xs font-bold text-slate-400 hover:text-slate-600 mb-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        arrow_back
+                      </span>
+                      BACK
+                    </button>
+                    {(
+                      ["reading", "completed", "dropped", "read-later"] as const
+                    ).map((status) => (
+                      <button
+                        key={status}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateStatusMutation.mutate(status);
+                        }}
+                        className={`text-left px-3 py-2 text-sm font-medium rounded-lg capitalize ${
+                          reading_status === status
+                            ? "bg-primary/10 text-primary"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        }`}
+                      >
+                        {status.replace("-", " ")}
+                      </button>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowCollectionSubmenu(false);
+                      }}
+                      className="flex items-center gap-1 text-left px-2 py-1.5 text-xs font-bold text-slate-400 hover:text-slate-600 mb-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        arrow_back
+                      </span>
+                      BACK
+                    </button>
+                    {collections.length === 0 ? (
+                      <p className="px-3 py-2 text-sm text-slate-400">
+                        No collections yet
+                      </p>
+                    ) : (
+                      collections.map((col) => (
+                        <button
+                          key={col.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCollectionMutation.mutate(col.id);
+                          }}
+                          disabled={addToCollectionMutation.isPending}
+                          className="text-left px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 rounded-lg truncate disabled:opacity-50"
+                        >
+                          {col.title}
+                        </button>
+                      ))
+                    )}
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -172,8 +331,6 @@ export const NovelCard: React.FC<NovelCardProps> = ({ entry }) => {
             className="shrink-0 ml-4 focus:outline-none"
             onClick={(e) => {
               e.stopPropagation();
-              // For now, also jump to novel details on button click
-              // (can be changed to go to reader directly depending on current_chapter_id)
               router.push(`/novel/${novel.id}`);
             }}
           >

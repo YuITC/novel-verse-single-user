@@ -5,9 +5,10 @@ interface Props {
   phase: CrawlPhase;
   logs: CrawlLogEntry[];
   progress: { success: number; failed: number; total: number };
+  onRetry?: () => void;
 }
 
-export function CrawlStatusPanel({ phase, logs, progress }: Props) {
+export function CrawlStatusPanel({ phase, logs, progress, onRetry }: Props) {
   const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -74,19 +75,37 @@ export function CrawlStatusPanel({ phase, logs, progress }: Props) {
           >
             {getPhaseIcon()}
           </span>
-          <div>
-            <p className="text-sm font-bold text-slate-800">{getPhaseText()}</p>
-            <div className="text-xs font-semibold mt-1 flex flex-wrap gap-2.5">
-              <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/50">
-                Success: {progress.success}
-              </span>
-              <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200/50">
-                Failed: {progress.failed}
-              </span>
-              <span className="text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/50">
-                Total: {progress.total}
-              </span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div>
+              <p className="text-sm font-bold text-slate-800">
+                {getPhaseText()}
+              </p>
+              <div className="text-xs font-semibold mt-1 flex flex-wrap gap-2.5">
+                <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/50">
+                  Success: {progress.success}
+                </span>
+                <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200/50">
+                  Failed: {progress.failed}
+                </span>
+                <span className="text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/50">
+                  Total: {progress.total}
+                </span>
+              </div>
             </div>
+
+            {onRetry &&
+              progress.failed > 0 &&
+              (phase === "completed" || phase === "failed") && (
+                <button
+                  onClick={onRetry}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 text-xs font-bold transition-all"
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    refresh
+                  </span>
+                  Retry Failed
+                </button>
+              )}
           </div>
         </div>
 

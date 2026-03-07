@@ -3,9 +3,39 @@ import { Shuba69Crawler } from "./69shuba";
 import { UukanshuCrawler } from "./uukanshu";
 import { createClient } from "@/lib/supabase/server";
 
+export class JobEmitter extends EventEmitter {
+  history: {
+    phase?: string;
+    metadata?: any;
+    logs: any[];
+    chapters: any[];
+    progress?: any;
+  } = { logs: [], chapters: [] };
+  cancelled = false;
+
+  constructor() {
+    super();
+    this.on("phase", (p) => (this.history.phase = p));
+    this.on("metadata", (m) => (this.history.metadata = m));
+    this.on("log", (l) => this.history.logs.push(l));
+    this.on("chapter", (c) => this.history.chapters.push(c));
+    this.on("progress", (pr) => (this.history.progress = pr));
+  }
+
+  addLog(level: "info" | "warn" | "error", message: string) {
+    const log = {
+      id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+    };
+    this.emit("log", log);
+  }
+}
+
 // Global cache to persist across hot reloads in dev
 const globalForCrawl = globalThis as unknown as {
-  crawlJobs: Map<string, EventEmitter>;
+  crawlJobs: Map<string, JobEmitter>;
 };
 
 if (!globalForCrawl.crawlJobs) {
@@ -35,11 +65,11 @@ export function getNovelIdFromUrl(url: string): string {
   ) {
     const match = url.match(/\/book\/(\d+)\.htm/);
     if (match) return match[1];
-    const match2 = url.match(/\/book\/(\d+)\//);
+    const match2 = url.match(/\/book\/(\d+)\/?/);
     if (match2) return match2[1];
   }
   if (url.includes("uukanshu.cc")) {
-    const match = url.match(/\/book\/(\d+)\//);
+    const match = url.match(/\/book\/(\d+)\/?/);
     if (match) return match[1];
   }
   throw new Error("Could not extract novel ID from URL");
@@ -50,24 +80,24 @@ export async function runBackgroundCrawl(
   url: string,
   userId: string,
   novelId: string,
+  targetIndexes?: number[],
 ) {
-  const emitter = new EventEmitter();
+  const emitter = new JobEmitter();
   crawlJobs.set(jobId, emitter);
   const supabase = await createClient();
 
-  emitter.emit("log", {
-    level: "info",
-    message: "Job registered successfully in memory.",
-  });
+  emitter.addLog(
+    "info",
+    targetIndexes?.length
+      ? `Retry job started for ${targetIndexes.length} chapters.`
+      : "Job registered successfully in memory.",
+  );
 
   try {
     const crawler = getCrawlerForUrl(url);
     const sourceNovelId = getNovelIdFromUrl(url);
 
-    emitter.emit("log", {
-      level: "info",
-      message: "Fetching novel metadata...",
-    });
+    emitter.addLog("info", "Fetching novel metadata...");
 
     // 1. Fetch metadata needed for updating crawl_jobs total_chapters
     const meta = await crawler.getNovelMetadata(sourceNovelId);
@@ -82,6 +112,9 @@ export async function runBackgroundCrawl(
         cover_url: meta.coverUrl,
         description_raw: meta.description,
         total_chapters: meta.totalChapters || 0,
+        total_words: meta.totalWords
+          ? parseInt(meta.totalWords.replace(/[^\d]/g, "")) || 0
+          : 0,
         publication_status: "ongoing", // Placeholder
         source_origin: origin,
       })
@@ -101,10 +134,10 @@ export async function runBackgroundCrawl(
       totalChapters: meta.totalChapters,
     });
 
-    emitter.emit("log", {
-      level: "info",
-      message: `Metadata fetched. Found ${meta.totalChapters || "unknown"} chapters.`,
-    });
+    emitter.addLog(
+      "info",
+      `Metadata fetched. Found ${meta.totalChapters || "unknown"} chapters.`,
+    );
 
     // Update job status
     await supabase
@@ -121,17 +154,22 @@ export async function runBackgroundCrawl(
     let failedCount = 0;
 
     // 2. Start streaming
-    for await (const chapterData of crawler.crawlAndStream(sourceNovelId)) {
-      // Did user cancel? We have no clean way to check without DB pooling, but we can assume
-      // for now this runs to completion unless server stops. We could add a check to Supabase here.
+    for await (const chapterData of crawler.crawlAndStream(
+      sourceNovelId,
+      targetIndexes,
+    )) {
+      if (emitter.cancelled) {
+        crawler.abort();
+        break;
+      }
 
       const isFailed = chapterData.content.startsWith("[CRAWL_FAILED]");
       if (isFailed) {
         failedCount++;
-        emitter.emit("log", {
-          level: "error",
-          message: `Failed to fetch chapter ${chapterData.index}: ${chapterData.title}`,
-        });
+        emitter.addLog(
+          "error",
+          `Failed to fetch chapter ${chapterData.index}: ${chapterData.title}`,
+        );
         emitter.emit("chapter", {
           index: chapterData.index,
           title: chapterData.title,
@@ -141,10 +179,10 @@ export async function runBackgroundCrawl(
         });
       } else {
         successCount++;
-        emitter.emit("log", {
-          level: "info",
-          message: `Successfully fetched chapter ${chapterData.index}: ${chapterData.title}`,
-        });
+        emitter.addLog(
+          "info",
+          `Successfully fetched chapter ${chapterData.index}: ${chapterData.title}`,
+        );
         emitter.emit("chapter", {
           index: chapterData.index,
           title: chapterData.title,
@@ -165,33 +203,27 @@ export async function runBackgroundCrawl(
         );
 
         if (chapterError) {
-          emitter.emit("log", {
-            level: "error",
-            message: `DB save failed for chapter ${chapterData.index}: ${chapterError.message}`,
-          });
+          emitter.addLog(
+            "error",
+            `DB save failed for chapter ${chapterData.index}: ${chapterError.message}`,
+          );
         }
       }
 
       // Progress update every few chapters to not spam DB
       if ((successCount + failedCount) % 5 === 0) {
-        await supabase
-          .from("crawl_jobs")
-          .update({
-            successful_chapters: successCount,
-            failed_chapters: failedCount,
-          })
-          .eq("id", jobId);
-
         emitter.emit("progress", {
           success: successCount,
           failed: failedCount,
-          total: meta.totalChapters || 0,
+          total: targetIndexes?.length || meta.totalChapters || 0,
         });
       }
     }
 
     // 3. Complete
     await crawler.closeBrowser();
+
+    if (emitter.cancelled) return;
 
     await supabase
       .from("crawl_jobs")
@@ -206,18 +238,15 @@ export async function runBackgroundCrawl(
     emitter.emit("progress", {
       success: successCount,
       failed: failedCount,
-      total: meta.totalChapters || successCount + failedCount,
+      total:
+        targetIndexes?.length ||
+        meta.totalChapters ||
+        successCount + failedCount,
     });
-    emitter.emit("log", {
-      level: "info",
-      message: "Crawl job completed successfully.",
-    });
+    emitter.addLog("info", "Crawl job completed successfully.");
     emitter.emit("phase", "completed");
   } catch (error: any) {
-    emitter.emit("log", {
-      level: "error",
-      message: `Crawl job failed: ${error.message}`,
-    });
+    emitter.addLog("error", `Crawl job failed: ${error.message}`);
     emitter.emit("phase", "failed");
     await supabase
       .from("crawl_jobs")
@@ -233,4 +262,27 @@ export async function runBackgroundCrawl(
       crawlJobs.delete(jobId);
     }, 60000);
   }
+}
+
+export async function retryBackgroundCrawl(jobId: string, userId: string) {
+  const supabase = await createClient();
+
+  const { data: job, error: jobError } = await supabase
+    .from("crawl_jobs")
+    .select("*")
+    .eq("id", jobId)
+    .single();
+
+  if (jobError || !job) throw new Error("Job not found");
+
+  await supabase
+    .from("crawl_jobs")
+    .update({
+      status: "pending",
+      error_message: null,
+      started_at: new Date().toISOString(),
+    })
+    .eq("id", jobId);
+
+  return runBackgroundCrawl(jobId, job.source_url, userId, job.novel_id);
 }

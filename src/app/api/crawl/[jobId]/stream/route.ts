@@ -58,8 +58,31 @@ export async function GET(
         return;
       }
 
+      // Small delay to ensure client is ready and connected
+      // eslint-disable-next-line no-promise-executor-return
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
       // Initial connecting state
-      sendEvent("phase", "fetching_meta");
+      const history = (emitter as any).history;
+
+      if (history) {
+        sendEvent("phase", history.phase || "fetching_meta");
+
+        // Replay history
+        if (history.metadata) {
+          sendEvent("metadata", history.metadata);
+        }
+        history.logs.forEach((log: any) => sendEvent("log", log));
+        history.chapters.forEach((chapter: any) =>
+          sendEvent("chapter", chapter),
+        );
+        if (history.progress) {
+          sendEvent("progress", history.progress);
+        }
+      } else {
+        // Fallback for legacy emitters or missing history
+        sendEvent("phase", "fetching_meta");
+      }
 
       // Attach event listeners
       const onPhase = (phase: string) => sendEvent("phase", phase);
@@ -76,27 +99,8 @@ export async function GET(
       emitter.on("progress", onProgress);
       emitter.on("error", onError);
 
-      // Close stream when phase is completed or failed
-      const checkEnd = (phase: string) => {
-        if (
-          phase === "completed" ||
-          phase === "failed" ||
-          phase === "cancelled"
-        ) {
-          setTimeout(() => {
-            try {
-              controller.close();
-            } catch {
-              // Ignore already closed stream errors
-            }
-          }, 1000);
-        }
-      };
-
-      emitter.on("phase", checkEnd);
-
-      // Handle client disconnect
-      req.signal.addEventListener("abort", () => {
+      // Cleanup function
+      const cleanup = () => {
         emitter.off("phase", onPhase);
         emitter.off("log", onLog);
         emitter.off("metadata", onMetadata);
@@ -104,6 +108,31 @@ export async function GET(
         emitter.off("progress", onProgress);
         emitter.off("error", onError);
         emitter.off("phase", checkEnd);
+      };
+
+      // Close stream when phase is completed or failed
+      function checkEnd(phase: string) {
+        if (
+          phase === "completed" ||
+          phase === "failed" ||
+          phase === "cancelled"
+        ) {
+          cleanup();
+          setTimeout(() => {
+            try {
+              controller.close();
+            } catch {
+              // Ignore
+            }
+          }, 1000);
+        }
+      }
+
+      emitter.on("phase", checkEnd);
+
+      // Handle client disconnect
+      req.signal.addEventListener("abort", () => {
+        cleanup();
       });
     },
   });
