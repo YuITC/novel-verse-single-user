@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { uploaderApi } from "../api/uploaderApi";
-import { NovelFormData, ChapterFormData } from "../types";
+import { NovelFormData } from "../types";
 import { StoryMetadataCard } from "./StoryMetadataCard";
-import { ChapterEditorCard } from "./ChapterEditorCard";
-import { ActionBar } from "./ActionBar";
 
 export function UploaderPage() {
   const searchParams = useSearchParams();
@@ -15,7 +13,6 @@ export function UploaderPage() {
 
   const [novelId, setNovelId] = useState<string | null>(novelIdParam);
   const [isLoading, setIsLoading] = useState(novelIdParam ? true : false);
-  const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
 
   const [novelData, setNovelData] = useState<NovelFormData>({
@@ -24,16 +21,6 @@ export function UploaderPage() {
     genres: [],
     publication_status: "ongoing",
     description: "",
-  });
-
-  const [chapters, setChapters] = useState<
-    { id: string; title: string; chapter_index: number }[]
-  >([]);
-  const [currentChapterId, setCurrentChapterId] = useState<string | null>(null);
-
-  const [chapterData, setChapterData] = useState<ChapterFormData>({
-    title: "",
-    content: "",
   });
 
   const [toast, setToast] = useState<{
@@ -52,32 +39,10 @@ export function UploaderPage() {
     try {
       const data = await uploaderApi.getNovel(id);
       setNovelData(data);
-      const chapterList = await uploaderApi.getChapters(id);
-      setChapters(chapterList);
       setIsLoading(false);
     } catch (err) {
       showToast("Failed to load novel.", "error");
       setIsLoading(false);
-    }
-  };
-
-  const handleChapterSelect = async (id: string | null) => {
-    if (!id) {
-      setCurrentChapterId(null);
-      setChapterData({
-        title: "",
-        content: "",
-        chapter_index: chapters.length + 1,
-      });
-      return;
-    }
-
-    try {
-      const data = await uploaderApi.getChapter(id);
-      setCurrentChapterId(id);
-      setChapterData(data);
-    } catch (err) {
-      showToast("Failed to load chapter content.", "error");
     }
   };
 
@@ -88,25 +53,22 @@ export function UploaderPage() {
 
   const validate = () => {
     if (!novelData.title.trim()) return "Story Title is required";
-    if (!chapterData.title.trim()) return "Chapter Title is required";
-    if (!chapterData.content.trim()) return "Chapter Content is required";
     return null;
   };
 
-  const handleSaveOrPublish = async (isPublishingAction: boolean) => {
+  const handleSaveOrPublish = async () => {
     const error = validate();
     if (error) {
       showToast(error, "error");
       return;
     }
 
-    const actionSetter = isPublishingAction ? setIsPublishing : setIsSaving;
-    actionSetter(true);
+    setIsPublishing(true);
 
     try {
       let currentNovelId = novelId;
 
-      // 1. Create or Update Novel
+      // Create or Update Novel
       if (!currentNovelId) {
         const res = await uploaderApi.createNovel(novelData);
         currentNovelId = res.id;
@@ -119,41 +81,11 @@ export function UploaderPage() {
         await uploaderApi.updateNovel(currentNovelId, novelData);
       }
 
-      // 2. Create or Update Chapter
-      if (currentChapterId) {
-        await uploaderApi.updateChapter(currentChapterId, chapterData);
-      } else {
-        const res = await uploaderApi.createChapter(
-          currentNovelId,
-          chapterData,
-        );
-        setCurrentChapterId(res.id);
-      }
-
-      // Refresh chapter list
-      const chapterList = await uploaderApi.getChapters(currentNovelId);
-      setChapters(chapterList);
-
-      showToast(
-        isPublishingAction
-          ? "Chapter Published Successfully!"
-          : "Draft Saved Successfully!",
-        "success",
-      );
-
-      // If published a new chapter, prepare for the next one
-      if (isPublishingAction && !currentChapterId) {
-        setCurrentChapterId(null);
-        setChapterData({
-          title: "",
-          content: "",
-          chapter_index: (chapterData.chapter_index || chapters.length) + 1,
-        });
-      }
+      showToast("Story Published Successfully!", "success");
     } catch (err: any) {
       showToast(err.message || "An error occurred", "error");
     } finally {
-      actionSetter(false);
+      setIsPublishing(false);
     }
   };
 
@@ -183,22 +115,7 @@ export function UploaderPage() {
         onChange={(updates) =>
           setNovelData((prev) => ({ ...prev, ...updates }))
         }
-      />
-
-      <ChapterEditorCard
-        data={chapterData}
-        chapters={chapters}
-        currentChapterId={currentChapterId || undefined}
-        onChapterSelect={(id) => handleChapterSelect(id || null)}
-        onChange={(updates) =>
-          setChapterData((prev) => ({ ...prev, ...updates }))
-        }
-      />
-
-      <ActionBar
-        onSave={() => handleSaveOrPublish(false)}
-        onPublish={() => handleSaveOrPublish(true)}
-        isSaving={isSaving}
+        onPublish={handleSaveOrPublish}
         isPublishing={isPublishing}
       />
 

@@ -21,6 +21,7 @@ export interface ToolbarFilters {
   sort: string;
   includeTags: string[];
   excludeTags: string[];
+  novelType: string;
 }
 
 interface LibraryToolbarProps {
@@ -143,6 +144,27 @@ export const LibraryToolbar: React.FC<LibraryToolbarProps> = ({
               <option value="ongoing">Ongoing</option>
               <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors">
+              <ChevronDown size={18} strokeWidth={3} />
+            </div>
+          </div>
+        </div>
+
+        {/* Type Filter */}
+        <div className="flex items-center gap-3">
+          <label className="text-[14px] font-extrabold text-slate-600 shrink-0 tracking-tight whitespace-nowrap">
+            Type:
+          </label>
+          <div className="relative group min-w-[120px]">
+            <select
+              className="w-full h-11 appearance-none bg-white border border-slate-200 rounded-full px-5 text-[14px] font-bold text-slate-600 outline-none hover:border-slate-300 focus:border-primary/50 focus:ring-[6px] focus:ring-primary/5 transition-all cursor-pointer pr-10 shadow-sm"
+              value={filters.novelType}
+              onChange={(e) => updateFilter("novelType", e.target.value)}
+            >
+              <option value="all">All</option>
+              <option value="crawled">Crawled</option>
+              <option value="uploaded">Uploaded</option>
             </select>
             <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors">
               <ChevronDown size={18} strokeWidth={3} />

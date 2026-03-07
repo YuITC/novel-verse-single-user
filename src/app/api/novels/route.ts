@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         description_raw: body.description,
         cover_url: body.cover_url,
         source_url: null, // User created
-        source_origin: null,
+        source_origin: "localhost", // Identifies uploaded/created novels
       })
       .select("id")
       .single();

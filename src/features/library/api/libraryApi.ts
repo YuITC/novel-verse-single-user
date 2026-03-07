@@ -10,6 +10,7 @@ export interface LibraryFilters {
   includeTags?: string[];
   excludeTags?: string[];
   sort?: string;
+  novelType?: string;
 }
 
 export const libraryApi = {
@@ -23,6 +24,7 @@ export const libraryApi = {
       includeTags,
       excludeTags,
       sort = "recently-read",
+      novelType = "all",
     } = filters;
 
     const hasChapterFilter =
@@ -32,7 +34,8 @@ export const libraryApi = {
       (search && search.trim()) ||
       (publicationStatus && publicationStatus !== "all") ||
       hasChapterFilter ||
-      (includeTags && includeTags.length > 0);
+      (includeTags && includeTags.length > 0) ||
+      novelType !== "all";
 
     let query = supabase.from("library_entries").select(
       `
@@ -69,6 +72,13 @@ export const libraryApi = {
     // Publication status filter
     if (publicationStatus && publicationStatus !== "all") {
       query = query.eq("novels.publication_status", publicationStatus);
+    }
+
+    // Novel type filter (source_origin)
+    if (novelType === "uploaded") {
+      query = query.eq("novels.source_origin", "localhost");
+    } else if (novelType === "crawled") {
+      query = query.neq("novels.source_origin", "localhost");
     }
 
     // Chapter range filter (slider-based)
@@ -115,8 +125,7 @@ export const libraryApi = {
       throw error;
     }
 
-    let results = (data as any[])
-      .filter((item) => item.novel !== null);
+    let results = (data as any[]).filter((item) => item.novel !== null);
 
     // Exclude tags filter (client-side — novel must NOT contain ANY excluded tag)
     if (excludeTags && excludeTags.length > 0) {
@@ -127,21 +136,21 @@ export const libraryApi = {
     }
 
     return results.map((item) => ({
-        id: item.id,
-        reading_status: item.reading_status as any,
-        current_chapter_id: item.current_chapter_id,
-        updated_at: item.updated_at,
-        novel: {
-          id: item.novel.id,
-          title: item.novel.title || "",
-          author: item.novel.author || "",
-          cover_url: item.novel.cover_url,
-          description: item.novel.description || "",
-          genres: item.novel.genres || [],
-          total_chapters: item.novel.total_chapters || 0,
-          publication_status: item.novel.publication_status || "ongoing",
-        },
-      }));
+      id: item.id,
+      reading_status: item.reading_status as any,
+      current_chapter_id: item.current_chapter_id,
+      updated_at: item.updated_at,
+      novel: {
+        id: item.novel.id,
+        title: item.novel.title || "",
+        author: item.novel.author || "",
+        cover_url: item.novel.cover_url,
+        description: item.novel.description || "",
+        genres: item.novel.genres || [],
+        total_chapters: item.novel.total_chapters || 0,
+        publication_status: item.novel.publication_status || "ongoing",
+      },
+    }));
   },
 
   getDistinctGenres: async (): Promise<string[]> => {

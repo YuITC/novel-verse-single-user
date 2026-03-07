@@ -84,6 +84,7 @@ const DEFAULT_FILTERS: ToolbarFilters = {
   sort: "recently-read",
   includeTags: [],
   excludeTags: [],
+  novelType: "all",
 };
 
 export const LibraryTabs: React.FC = () => {

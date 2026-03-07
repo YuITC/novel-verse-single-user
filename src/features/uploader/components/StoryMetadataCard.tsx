@@ -11,10 +11,18 @@ interface Props {
     cover_url?: string;
   };
   onChange: (data: Partial<Props["data"]>) => void;
+  onPublish: () => void;
+  isPublishing: boolean;
   disabled?: boolean;
 }
 
-export function StoryMetadataCard({ data, onChange, disabled }: Props) {
+export function StoryMetadataCard({
+  data,
+  onChange,
+  onPublish,
+  isPublishing,
+  disabled,
+}: Props) {
   const [isUploading, setIsUploading] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -201,6 +209,26 @@ export function StoryMetadataCard({ data, onChange, disabled }: Props) {
               placeholder="What is this story about?"
               className="w-full h-32 p-4 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-slate-400 resize-y font-medium text-sm leading-relaxed"
             />
+          </div>
+
+          {/* Action Footer */}
+          <div className="pt-4 border-t border-slate-100 flex justify-end">
+            <button
+              onClick={onPublish}
+              disabled={disabled || isPublishing}
+              className="h-11 px-8 rounded-xl font-bold text-white bg-primary hover:bg-primary/90 shadow-sm shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPublishing ? (
+                <span className="material-symbols-outlined text-[20px] animate-spin">
+                  autorenew
+                </span>
+              ) : (
+                <span className="material-symbols-outlined text-[20px]">
+                  rocket_launch
+                </span>
+              )}
+              Publish Story
+            </button>
           </div>
         </div>
       </div>
